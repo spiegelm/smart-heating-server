@@ -82,4 +82,16 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(data.get('name'), 'Dining Room')
         self.assertEqual(data.get('residence'), 'http://testserver/residence/3/')
 
+    def test_get_room_detail(self):
+        room = models.Room.objects.create(residence=self.residence, name='Dining Room')
+
+        response = self.client.get('/residence/3/room/%s/' % room.pk)
+
+        self.assertEqual(response.status_code, 200)
+        data = response.data
+        self.assertEqual(data.get('id'), room.pk)
+        self.assertEqual(data.get('url'), 'http://testserver/residence/3/room/%s/' % room.pk)
+        self.assertEqual(data.get('name'), 'Dining Room')
+        self.assertEqual(data.get('residence'), 'http://testserver/residence/3/')
+
     # TODO add test for PUT and POST

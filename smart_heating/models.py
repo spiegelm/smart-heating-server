@@ -15,6 +15,15 @@ class Residence(models.Model):
         """
         return self.rfid
 
+    def get_recursive_pks(self):
+        """
+        Returns a list of primary keys of all recursive parents.
+        Used to determine the URL of an object.
+        """
+        pks = [self.pk]
+        return pks
+
+
 
 class User(models.Model):
     imei = models.CharField(primary_key=True, max_length=100)
@@ -33,6 +42,16 @@ class Room(models.Model):
 
     class Meta:
         ordering = ('name',)
+
+    def get_recursive_pks(self):
+        """
+        Returns a list of primary keys of all recursive parents.
+        Used to determine the URL of an object.
+        """
+        pks = self.residence.get_recursive_pks()
+        pks.append(self.pk)
+        return pks
+
 
 # TODO model the heating table
 # class HeatingTable(models.Model):
