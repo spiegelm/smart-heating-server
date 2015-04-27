@@ -7,7 +7,7 @@ class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
     rooms = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     # rooms = serializers.HyperlinkedRelatedField(many=True, view_name='room-detail',
     #                                             lookup_url_kwarg='residence,room', read_only=True)
-    room_base_url = serializers.HyperlinkedIdentityField(view_name='room-list', lookup_url_kwarg='residence')
+    room_base_url = serializers.HyperlinkedIdentityField(view_name='room-list', lookup_url_kwarg='residence_pk')
 
     class Meta:
         model = Residence
