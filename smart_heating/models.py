@@ -28,7 +28,7 @@ class Residence(models.Model):
 class User(models.Model):
     imei = models.CharField(primary_key=True, max_length=100)
     name = models.CharField(max_length=100)
-    residence = models.ForeignKey('Residence')
+    residence = models.ForeignKey('Residence', related_name='users')
 
     class Meta:
         ordering = ('imei',)

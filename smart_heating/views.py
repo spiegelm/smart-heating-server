@@ -17,6 +17,17 @@ class ResidenceViewSet(viewsets.ModelViewSet):
     serializer_class = ResidenceSerializer
 
 
+class UserViewSet(viewsets.ModelViewSet):
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        residence_pk = self.kwargs['residence_pk']
+        queryset = User.objects.filter(residence=residence_pk)
+        return queryset
+
+
 class RoomViewSet(viewsets.ModelViewSet):
 
     queryset = Room.objects.all()
@@ -30,7 +41,6 @@ class RoomViewSet(viewsets.ModelViewSet):
         # uid = self.kwargs.get(self.lookup_url_kwarg)
         return queryset
 
-
     def list(self, request, residence_pk):
         queryset = self.get_queryset(residence_pk)
         serializer = RoomSerializer(queryset, many=True, context={'request': request})
@@ -38,8 +48,8 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, residence_pk, pk):
         queryset = self.get_queryset(residence_pk)
-        user = get_object_or_404(queryset, pk=pk, residence=residence_pk)
-        serializer = RoomSerializer(user, context={'request': request})
+        room = get_object_or_404(queryset, pk=pk, residence=residence_pk)
+        serializer = RoomSerializer(room, context={'request': request})
         # TODO resolve the url via the RoomSerializer,
         # such that it can also be shown in the residence resource
         data = serializer.data

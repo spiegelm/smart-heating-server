@@ -6,6 +6,7 @@ from smart_heating.models import *
 
 class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
     rooms = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     # TODO reference rooms per URL using a custom Field
     # http://www.django-rest-framework.org/api-guide/relations/#advanced-hyperlinked-fields
     # rooms = serializers.HyperlinkedRelatedField(many=True, view_name='room-detail',
@@ -14,7 +15,15 @@ class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Residence
-        fields = ('rfid', 'url', 'room_base_url', 'rooms')
+        fields = ('rfid', 'url', 'room_base_url', 'rooms', 'users')
+
+
+# TODO use a HyperlinkedModelSerializer
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('imei', 'name', 'residence')
 
 
 class RoomSerializer(serializers.HyperlinkedModelSerializer):
