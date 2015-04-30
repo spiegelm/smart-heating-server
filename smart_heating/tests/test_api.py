@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.test import APITestCase
 from smart_heating import models
 
@@ -7,7 +8,7 @@ class ViewRootTestCase(APITestCase):
     def test_root_contains_residence_url(self):
         response = self.client.get('/')
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data,
                          {'residence': 'http://testserver/residence/'})
 
@@ -17,14 +18,14 @@ class ViewResidenceTestCase(APITestCase):
     def test_get_empty_residence_list(self):
         response = self.client.get('/residence/')
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
     def test_get_nonempty_residence_list(self):
         residence = models.Residence.objects.create(rfid='3')
         response = self.client.get('/residence/')
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         data = response.data[0]
         self.assertEqual(data.get('rfid'), '3', 'RFID')
@@ -36,7 +37,7 @@ class ViewResidenceTestCase(APITestCase):
         residence = models.Residence.objects.create(rfid='3')
         response = self.client.get('/residence/3/')
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data
         self.assertEqual(data.get('rfid'), '3', 'RFID')
         self.assertEqual(data.get('url'), 'http://testserver/residence/3/')
@@ -49,14 +50,27 @@ class ViewResidenceTestCase(APITestCase):
         room2 = models.Room.objects.create(residence=residence)
         response = self.client.get('/residence/3/')
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data
         self.assertEqual(data.get('rfid'), '3', 'RFID')
         self.assertEqual(data.get('url'), 'http://testserver/residence/3/')
         self.assertEqual(data.get('room_base_url'), 'http://testserver/residence/3/room/')
         self.assertEqual(data.get('rooms'), [room1.pk, room2.pk])
 
-    # TODO add test for PUT and POST
+    def test_create_residence(self):
+        response = self.client.post('/residence/', {'rfid' : '3'}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data = response.data
+        self.assertEqual(data.get('rfid'), '3')
+
+        queryset = models.Residence.objects.all().filter(pk='3')
+        self.assertEqual(len(queryset), 1)
+        residence = queryset[0]
+        self.assertEqual(residence.rfid, '3')
+
+    # TODO add test for PUT
+
 
 class ViewRoomTestCase(APITestCase):
 
@@ -68,7 +82,7 @@ class ViewRoomTestCase(APITestCase):
     def test_get_empty_room_list(self):
         response = self.client.get('/residence/3/room/')
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
     def test_get_nonempty_room_list(self):
@@ -76,7 +90,7 @@ class ViewRoomTestCase(APITestCase):
 
         response = self.client.get('/residence/3/room/')
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         data = response.data[0]
         self.assertEqual(data.get('name'), 'Dining Room')
@@ -87,7 +101,7 @@ class ViewRoomTestCase(APITestCase):
 
         response = self.client.get('/residence/3/room/%s/' % room.pk)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data
         self.assertEqual(data.get('id'), room.pk)
         self.assertEqual(data.get('url'), 'http://testserver/residence/3/room/%s/' % room.pk)
