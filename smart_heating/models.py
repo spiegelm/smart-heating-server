@@ -68,6 +68,7 @@ class Thermostat(models.Model):
 class Temperature(models.Model):
     datetime = models.DateTimeField(primary_key=True)
     value = models.FloatField()
+    thermostat = models.ForeignKey('Thermostat', related_name='temperatures')
 
     class Meta:
         ordering = ('datetime',)

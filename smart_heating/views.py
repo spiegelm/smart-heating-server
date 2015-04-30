@@ -70,3 +70,43 @@ class ThermostatViewSet(viewsets.ModelViewSet):
         thermostat = get_object_or_404(queryset, pk=pk, room=room_pk)
         serializer = ThermostatSerializer(thermostat, context={'request': request})
         return Response(serializer.data)
+
+
+from rest_framework import status
+import django
+
+
+class TemperatureViewSet(viewsets.ModelViewSet):
+
+    queryset = Temperature.objects.all()
+    serializer_class = TemperatureSerializer
+
+    def get_queryset(self, residence_pk, room_pk, thermostat_pk):
+        # check residence, room and thermostat
+        get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
+        get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
+        return super(TemperatureViewSet, self).get_queryset()
+
+    def list(self, request, residence_pk, room_pk, thermostat_pk):
+        queryset = self.get_queryset(residence_pk, room_pk, thermostat_pk)
+        list = queryset.all().filter(thermostat=thermostat_pk)
+        serializer = TemperatureSerializer(list, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def retrieve(self, request, residence_pk, room_pk, thermostat_pk, pk):
+        queryset = self.get_queryset(residence_pk, room_pk, thermostat_pk)
+        temperature = get_object_or_404(queryset, pk=pk, thermostat=thermostat_pk)
+        serializer = TemperatureSerializer(temperature, context={'request': request})
+        return Response(serializer.data)
+
+    # TODO make create (POST) working
+    # def create(self, request, *args, **kwargs):
+    #     data = request.data
+    #     data.update(kwargs)
+    #     print(data)
+    #
+    #     serializer = TemperatureSerializer(context={'request': request}, data=data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

@@ -13,7 +13,6 @@ class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Residence
         fields = ('rfid', 'url', 'room_base_url', 'rooms')
-        # fields = ('url', 'rfid')
 
 
 class RoomSerializer(serializers.HyperlinkedModelSerializer):
@@ -24,8 +23,16 @@ class RoomSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url', 'name', 'residence')
 
 
+# TODO use a HyperlinkedModelSerializer
 class ThermostatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Thermostat
         fields = ('rfid', 'room')
 
+
+# TODO use a HyperlinkedModelSerializer
+class TemperatureSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Temperature
+        fields = ('datetime', 'value')

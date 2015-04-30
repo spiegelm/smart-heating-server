@@ -5,7 +5,10 @@ from smart_heating import views
 router = routers.DefaultRouter()
 router.register(r'residence', views.ResidenceViewSet)
 router.register(r'residence/(?P<residence_pk>[^/.]+)/room', views.RoomViewSet)
-router.register(r'residence/(?P<residence_pk>[^/.]+)/room/(?P<room_pk>[^/.]+)/thermostat', views.ThermostatViewSet)
+router.register(r'residence/(?P<residence_pk>[^/.]+)/room/(?P<room_pk>[^/.]+)/'
+                r'thermostat', views.ThermostatViewSet)
+router.register(r'residence/(?P<residence_pk>[^/.]+)/room/(?P<room_pk>[^/.]+)/'
+                r'thermostat/(?P<thermostat_pk>[^/.]+)/temperature', views.TemperatureViewSet)
 
 
 urlpatterns = [
