@@ -99,13 +99,13 @@ class ViewRoomTestCase(APITestCase):
     def setUp(self):
         self.residence = models.Residence.objects.create(rfid='3')
 
-    def test_get_empty_room_list(self):
+    def test_list_rooms_empty(self):
         response = self.client.get('/residence/3/room/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
-    def test_get_nonempty_room_list(self):
+    def test_list_single_room(self):
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
 
         response = self.client.get('/residence/3/room/')
@@ -115,7 +115,7 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.data[0].get('name'), 'Dining Room')
         self.assertEqual(response.data[0].get('residence'), 'http://testserver/residence/3/')
 
-    def test_get_room_detail(self):
+    def test_get_room(self):
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
 
         response = self.client.get('/residence/3/room/%s/' % room.pk)
@@ -126,14 +126,14 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.data.get('name'), 'Dining Room')
         self.assertEqual(response.data.get('residence'), 'http://testserver/residence/3/')
 
-    def test_get_room_detail_shows_thermostats(self):
+    def test_get_room_shows_thermostats(self):
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
         thermostat = models.Thermostat.objects.create(room=room, rfid='thermoX')
 
         response = self.client.get('/residence/3/room/%s/' % room.pk)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data.get('thermostats'), ['thermoX'])
+        self.assertEqual(response.data.get('thermostats_pk'), ['thermoX'])
 
     # TODO add test for PUT and POST
 

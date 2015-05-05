@@ -28,25 +28,27 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RoomSerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='room-detail', read_only=True)
-    thermostats = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    residence_pk = serializers.PrimaryKeyRelatedField(source='residence', read_only=True)
+    thermostats_pk = serializers.PrimaryKeyRelatedField(source='thermostats', many=True, read_only=True)
 
     class Meta:
         model = Room
-        fields = ('id', 'url', 'name', 'residence', 'thermostats')
+        fields = ('id', 'url', 'name', 'residence', 'residence_pk', 'thermostats_pk')
 
 
 # TODO use a HyperlinkedModelSerializer
 class ThermostatSerializer(serializers.ModelSerializer):
-    temperatures = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    temperatures_pk = serializers.PrimaryKeyRelatedField(source='temperatures', many=True, read_only=True)
 
     class Meta:
         model = Thermostat
-        fields = ('rfid', 'room', 'temperatures')
+        fields = ('rfid', 'room', 'temperatures_pk')
 
 
 # TODO use a HyperlinkedModelSerializer
 class TemperatureSerializer(serializers.ModelSerializer):
+    thermostat_pk = serializers.PrimaryKeyRelatedField(source='thermostat', read_only=True)
 
     class Meta:
         model = Temperature
-        fields = ('datetime', 'value', 'thermostat')
+        fields = ('datetime', 'value', 'thermostat_pk')
