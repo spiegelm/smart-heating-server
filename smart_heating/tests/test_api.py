@@ -114,6 +114,7 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0].get('name'), 'Dining Room')
         self.assertEqual(response.data[0].get('residence'), 'http://testserver/residence/3/')
+        self.assertEqual(response.data[0].get('residence_pk'), '3')
 
     def test_get_room(self):
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
@@ -125,6 +126,7 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.data.get('url'), 'http://testserver/residence/3/room/%s/' % room.pk)
         self.assertEqual(response.data.get('name'), 'Dining Room')
         self.assertEqual(response.data.get('residence'), 'http://testserver/residence/3/')
+        self.assertEqual(response.data.get('residence_pk'), '3')
 
     def test_get_room_shows_thermostats(self):
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
@@ -135,7 +137,43 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('thermostats_pk'), ['thermoX'])
 
-    # TODO add test for PUT and POST
+    def test_get_room_404(self):
+        response = self.client.get('/residence/3/room/1/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_create_room(self):
+        response = self.client.post('/residence/3/room/', {'name': 'Dining Room',
+                                                           'residence': 'http://testserver/residence/3/'})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_room_requires_residence_data(self):
+        response = self.client.post('/residence/3/room/', {'name': 'Dining Room'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_room(self):
+        room = models.Room.objects.create(residence=self.residence, name='Dining Room')
+
+        response = self.client.put('/residence/3/room/%s/' % room.pk, {'name': 'Play Room',
+                                                                       'residence': 'http://testserver/residence/3/'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        queryset = models.Room.objects.filter(pk=room.pk)
+        self.assertEqual(len(queryset), 1)
+        self.assertEqual(queryset[0].pk, room.pk)
+        self.assertEqual(queryset[0].name, 'Play Room')
+
+    def test_destroy_room(self):
+        room = models.Room.objects.create(residence=self.residence, name='Dining Room')
+
+        # Delete resource
+        response = self.client.delete('/residence/3/room/%s/' % room.pk)
+
+        # Test response code
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Test room is deleted
+        queryset = models.Room.objects.filter(pk=room.pk)
+        self.assertEqual(len(queryset), 0)
 
 
 class ViewThermostatTestCase(APITestCase):
