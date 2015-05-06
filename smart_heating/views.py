@@ -33,28 +33,9 @@ class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
-    # TODO require the residence for all queries in a unified way
-
-    def get_queryset(self, residence_pk):
-        queryset = Room.objects.filter(residence=residence_pk)
-        # http://stackoverflow.com/questions/21292646/capture-parameters-in-django-rest-framework
-        # uid = self.kwargs.get(self.lookup_url_kwarg)
-        return queryset
-
-    def list(self, request, residence_pk):
-        queryset = self.get_queryset(residence_pk)
-        serializer = RoomSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    def retrieve(self, request, residence_pk, pk):
-        queryset = self.get_queryset(residence_pk)
-        room = get_object_or_404(queryset, pk=pk, residence=residence_pk)
-        serializer = RoomSerializer(room, context={'request': request})
-        # TODO resolve the url via the RoomSerializer,
-        # such that it can also be shown in the residence resource
-        data = serializer.data
-        # data['url'] = reverse('room-detail', args=[residence, pk], request=request)
-        return Response(data)
+    def get_queryset(self):
+        residence_pk = self.kwargs.get('residence_pk')
+        return Room.objects.filter(residence=residence_pk)
 
 
 class ThermostatViewSet(viewsets.ModelViewSet):
