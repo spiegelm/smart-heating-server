@@ -30,19 +30,20 @@ class RoomSerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='room-detail', read_only=True)
     residence_pk = serializers.PrimaryKeyRelatedField(source='residence', read_only=True)
     thermostats_pk = serializers.PrimaryKeyRelatedField(source='thermostats', many=True, read_only=True)
+    # TODO thermostats as urls
 
     class Meta:
         model = Room
         fields = ('id', 'url', 'name', 'residence', 'residence_pk', 'thermostats_pk')
 
 
-# TODO use a HyperlinkedModelSerializer
-class ThermostatSerializer(serializers.ModelSerializer):
+class ThermostatSerializer(serializers.HyperlinkedModelSerializer):
+    room_pk = serializers.PrimaryKeyRelatedField(source='room', queryset=Room.objects.all())
     temperatures_pk = serializers.PrimaryKeyRelatedField(source='temperatures', many=True, read_only=True)
 
     class Meta:
         model = Thermostat
-        fields = ('rfid', 'room', 'temperatures_pk')
+        fields = ('rfid', 'room_pk', 'temperatures_pk')
 
 
 # TODO use a HyperlinkedModelSerializer

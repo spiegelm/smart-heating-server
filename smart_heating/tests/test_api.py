@@ -183,10 +183,70 @@ class ViewThermostatTestCase(APITestCase):
 
     def setUp(self):
         self.residence = models.Residence.objects.create(rfid='3')
-        self.room = models.Room.objects.create(residence=self.residence)
+        self.room = models.Room.objects.create(residence=self.residence, pk=1)
 
-    def test_get_empty_thermostat_list(self):
-        response = self.client.get('/residence/3/room/%s/thermostat/' % self.room.pk)
+    def test_list_thermostats_empty(self):
+        response = self.client.get('/residence/3/room/1/thermostat/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
+
+    def test_list_single_thermostat(self):
+        thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
+
+        response = self.client.get('/residence/3/room/1/thermostat/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('rfid'), '7e')
+        self.assertEqual(response.data[0].get('room_pk'), 1)
+
+    def test_get_thermostat(self):
+        thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
+
+        response = self.client.get('/residence/3/room/1/thermostat/7e/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('rfid'), '7e')
+        self.assertEqual(response.data.get('room_pk'), 1)
+        self.assertEqual(response.data.get('temperatures_pk'), [])
+
+    def test_get_thermostat_shows_temperatures(self):
+        thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
+        temperature = models.Temperature.objects.create(thermostat=thermostat,
+                                                        datetime='2015-04-30T12:00:00Z', value=36)
+
+        response = self.client.get('/residence/3/room/1/thermostat/7e/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('rfid'), '7e')
+        self.assertEqual(response.data.get('room_pk'), 1)
+        self.assertEqual(len(response.data.get('temperatures_pk')), 1)
+        self.assertEqual(str(response.data.get('temperatures_pk')[0]), '2015-04-30 12:00:00+00:00')
+
+    def test_get_thermostat_404(self):
+        response = self.client.get('/residence/3/room/1/thermostat/8/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_create_thermostat(self):
+        data = {'rfid': '7e', 'room_pk': self.room.pk}
+        response = self.client.post('/residence/3/room/1/thermostat/', data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data.get('rfid'), '7e')
+
+        queryset = models.Thermostat.objects.all().filter(rfid='7e')
+        self.assertEqual(len(queryset), 1)
+        self.assertEqual(queryset[0].rfid, '7e')
+
+    def test_update_room(self):
+        thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
+
+        data = {'rfid': '42', 'room_pk': self.room.pk}
+        response = self.client.put('/residence/3/room/1/thermostat/7e/', data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        queryset = models.Thermostat.objects.filter(rfid='42')
+        self.assertEqual(len(queryset), 1)
+        self.assertEqual(queryset[0].rfid, '42')
