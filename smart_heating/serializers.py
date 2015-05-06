@@ -48,7 +48,7 @@ class ThermostatSerializer(serializers.HyperlinkedModelSerializer):
 
 # TODO use a HyperlinkedModelSerializer
 class TemperatureSerializer(serializers.ModelSerializer):
-    thermostat_pk = serializers.PrimaryKeyRelatedField(source='thermostat', read_only=True)
+    thermostat_pk = serializers.PrimaryKeyRelatedField(source='thermostat', queryset=Thermostat.objects.all())
 
     class Meta:
         model = Temperature
