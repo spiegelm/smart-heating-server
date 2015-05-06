@@ -240,7 +240,7 @@ class ViewThermostatTestCase(APITestCase):
         self.assertEqual(len(queryset), 1)
         self.assertEqual(queryset[0].rfid, '7e')
 
-    def test_update_room(self):
+    def test_update_thermostat(self):
         thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
 
         data = {'rfid': '42', 'room_pk': self.room.pk}
