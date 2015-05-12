@@ -2,6 +2,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from smart_heating import models
 
+from django.utils import timezone
+import datetime
+
 
 class ViewRootTestCase(APITestCase):
 
@@ -273,3 +276,32 @@ class ViewThermostatTestCase(APITestCase):
         queryset = models.Thermostat.objects.filter(rfid='42')
         self.assertEqual(len(queryset), 1)
         self.assertEqual(queryset[0].rfid, '42')
+
+
+class ViewTemperatureTestCase(APITestCase):
+
+    residence = None
+    room = None
+    thermostat = None
+
+    def setUp(self):
+        self.residence = models.Residence.objects.create(rfid='3')
+        self.room = models.Room.objects.create(residence=self.residence, name='fancy room name')
+        self.thermostat = models.Thermostat.objects.create(room=self.room, rfid='5')
+
+    def test_list_temperature_empty(self):
+        result = self.client.get('/residence/3/room/1/thermostat/5/temperature/')
+
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        self.assertEqual(result.data, [])
+
+    def test_get_temperature_representation_contains_datetime_and_value(self):
+        date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        temperature = models.Temperature.objects.create(thermostat=self.thermostat,
+                                                        datetime=date, value=36.1)
+
+        response = self.client.get('/residence/3/room/1/thermostat/5/temperature/%s/' % date.isoformat())
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('datetime'), '2015-05-13T07:00:00Z')
+        self.assertEqual(response.data.get('value'), 36.1)
