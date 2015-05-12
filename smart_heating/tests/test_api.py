@@ -186,8 +186,7 @@ class ViewRoomTestCase(APITestCase):
     def test_update_room(self):
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
 
-        response = self.client.put('/residence/3/room/%s/' % room.pk, {'name': 'Play Room',
-                                                                       'residence': 'http://testserver/residence/3/'})
+        response = self.client.put('/residence/3/room/%s/' % room.pk, {'name': 'Play Room'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         queryset = models.Room.objects.filter(pk=room.pk)
         self.assertEqual(len(queryset), 1)
