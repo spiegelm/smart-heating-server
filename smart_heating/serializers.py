@@ -25,7 +25,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class RoomSerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='room-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
-    thermostats_url = relations.HierarchicalHyperlinkedIdentityField(source='thermostats', view_name='thermostat-list', read_only=True)
+    thermostats_url = relations.HierarchicalHyperlinkedIdentityField(source='thermostats', view_name='thermostat-list',
+                                                                     read_only=True)
 
     class Meta:
         model = Room
@@ -33,17 +34,19 @@ class RoomSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ThermostatSerializer(serializers.HyperlinkedModelSerializer):
-    room_pk = serializers.PrimaryKeyRelatedField(source='room', queryset=Room.objects.all())
-    temperatures_pk = serializers.PrimaryKeyRelatedField(source='temperatures', many=True, read_only=True)
+    url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostat-detail', read_only=True)
+    room = RoomSerializer(read_only=True)
+    temperatures_url = relations.HierarchicalHyperlinkedIdentityField(source='temperatures',
+                                                                      view_name='temperature-list', read_only=True)
 
     class Meta:
         model = Thermostat
-        fields = ('rfid', 'room_pk', 'temperatures_pk')
+        fields = ('rfid', 'url', 'room', 'temperatures_url')
 
 
-# TODO use a HyperlinkedModelSerializer
-class TemperatureSerializer(serializers.ModelSerializer):
-    thermostat_pk = serializers.PrimaryKeyRelatedField(source='thermostat', queryset=Thermostat.objects.all())
+class TemperatureSerializer(serializers.HyperlinkedModelSerializer):
+    url = relations.HierarchicalHyperlinkedIdentityField(view_name='termperature-detail', read_only=True)
+    thermostat = ThermostatSerializer(read_only=True)
 
     class Meta:
         model = Temperature

@@ -59,6 +59,12 @@ class ThermostatViewSet(viewsets.ModelViewSet):
         get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
         return Thermostat.objects.filter(room=room_pk)
 
+    def perform_create(self, serializer):
+        # Grab residence from kwargs provided by the router
+        room = Room.objects.get(pk=self.kwargs.get('room_pk'))
+        # Add residence information to the serializer
+        serializer.save(room=room)
+
 
 class TemperatureViewSet(viewsets.ModelViewSet):
 

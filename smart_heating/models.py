@@ -71,12 +71,17 @@ class Room(Model):
 # class HeatingTable(models.Model):
 
 
-class Thermostat(models.Model):
+class Thermostat(Model):
     rfid = models.CharField(primary_key=True, max_length=100)
     room = models.ForeignKey('Room', related_name='thermostats')
 
     class Meta:
         ordering = ('rfid',)
+
+    def get_recursive_pks(self):
+        pks = self.room.get_recursive_pks()
+        pks.append(self.pk)
+        return pks
 
 
 class Temperature(models.Model):
