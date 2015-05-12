@@ -89,7 +89,55 @@ class ViewResidenceTestCase(APITestCase):
         self.assertEqual(len(queryset), 0)
 
 
-# TODO add tests for user resource
+class ViewUserTestCase(APITestCase):
+
+    residence = None
+
+    def setUp(self):
+        self.residence = models.Residence.objects.create(rfid='3')
+
+    def test_list_users_empty(self):
+        response = self.client.get('/residence/3/user/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [])
+
+    def test_user_collection_contains_user_representations(self):
+        user0 = models.User.objects.create(residence=self.residence, imei='123', name='Le Me')
+        user1 = models.User.objects.create(residence=self.residence, imei='456', name='El user')
+
+        response_user0 = self.client.get('/residence/3/user/123/')
+        response_user1 = self.client.get('/residence/3/user/456/')
+        response = self.client.get('/residence/3/user/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data[0], response_user0.data)
+        self.assertEqual(response.data[1], response_user1.data)
+
+    def test_user_representation_contains_imei_and_name(self):
+        user0 = models.User.objects.create(residence=self.residence, imei='123', name='Le Me')
+
+        response_user0 = self.client.get('/residence/3/user/123/')
+
+        self.assertEqual(response_user0.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_user0.data.get('imei'), '123')
+        self.assertEqual(response_user0.data.get('name'), 'Le Me')
+
+    def test_get_non_existant_user_imei_results_in_404(self):
+        response = self.client.get('/residence/3/user/123/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_create_user(self):
+        user_data = {'imei': '123', 'name': 'Le Me'}
+        response = self.client.post('/residence/3/user/', user_data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        user = models.User.objects.get(imei='123')
+        self.assertEqual(user.imei, '123')
+        self.assertEqual(user.name, 'Le Me')
 
 
 class ViewRoomTestCase(APITestCase):
