@@ -23,8 +23,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         residence_pk = self.kwargs['residence_pk']
-        queryset = User.objects.filter(residence=residence_pk)
-        return queryset
+        return User.objects.filter(residence=residence_pk)
+
+    def perform_create(self, serializer):
+        # Grab residence from kwargs provided by the router
+        residence = Residence.objects.get(pk=self.kwargs.get('residence_pk'))
+        # Add residence information to the serializer
+        serializer.save(residence=residence)
 
 
 class RoomViewSet(viewsets.ModelViewSet):

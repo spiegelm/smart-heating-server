@@ -15,7 +15,7 @@ class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='user-detail', read_only=True)
-    residence = ResidenceSerializer()
+    residence = ResidenceSerializer(read_only=True)
 
     class Meta:
         model = User
