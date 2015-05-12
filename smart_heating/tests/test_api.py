@@ -124,7 +124,7 @@ class ViewUserTestCase(APITestCase):
         self.assertEqual(response_user0.data.get('imei'), '123')
         self.assertEqual(response_user0.data.get('name'), 'Le Me')
 
-    def test_get_non_existant_user_imei_results_in_404(self):
+    def test_get_non_existent_user_imei_results_in_404(self):
         response = self.client.get('/residence/3/user/123/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
