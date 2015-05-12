@@ -27,11 +27,10 @@ class ViewResidenceTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-        data = response.data[0]
-        self.assertEqual(data.get('rfid'), '3', 'RFID')
-        self.assertEqual(data.get('url'), 'http://testserver/residence/3/')
-        self.assertEqual(data.get('room_base_url'), 'http://testserver/residence/3/room/')
-        self.assertEqual(data.get('rooms'), [])
+        self.assertEqual(response.data[0].get('rfid'), '3', 'RFID')
+        self.assertEqual(response.data[0].get('url'), 'http://testserver/residence/3/')
+        self.assertEqual(response.data[0].get('rooms_url'), 'http://testserver/residence/3/room/')
+        self.assertEqual(response.data[0].get('users_url'), 'http://testserver/residence/3/user/')
 
     def test_get_residence_without_rooms(self):
         residence = models.Residence.objects.create(rfid='3')
@@ -40,8 +39,8 @@ class ViewResidenceTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('rfid'), '3', 'RFID')
         self.assertEqual(response.data.get('url'), 'http://testserver/residence/3/')
-        self.assertEqual(response.data.get('room_base_url'), 'http://testserver/residence/3/room/')
-        self.assertEqual(response.data.get('rooms'), [])
+        self.assertEqual(response.data.get('rooms_url'), 'http://testserver/residence/3/room/')
+        self.assertEqual(response.data.get('users_url'), 'http://testserver/residence/3/user/')
 
     def test_get_residence_with_rooms(self):
         residence = models.Residence.objects.create(rfid='3')
@@ -52,8 +51,8 @@ class ViewResidenceTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('rfid'), '3', 'RFID')
         self.assertEqual(response.data.get('url'), 'http://testserver/residence/3/')
-        self.assertEqual(response.data.get('room_base_url'), 'http://testserver/residence/3/room/')
-        self.assertEqual(response.data.get('rooms'), [room1.pk, room2.pk])
+        self.assertEqual(response.data.get('rooms_url'), 'http://testserver/residence/3/room/')
+        self.assertEqual(response.data.get('users_url'), 'http://testserver/residence/3/user/')
 
     def test_get_residence_404(self):
         response = self.client.get('/residence/3/')
