@@ -1,9 +1,28 @@
 from django.db import models
+from abc import ABCMeta, abstractmethod
 
 # Create your models here.
 
 
-class Residence(models.Model):
+class Model(models.Model):
+    __metaclass__ = ABCMeta
+
+    # TODO refactor the models to reuse more code
+    # parent = None
+
+    class Meta:
+        abstract = True
+
+    @abstractmethod
+    def get_recursive_pks(self):
+        """
+        Returns a list of primary keys of all recursive parents.
+        Used to determine the URL of an object.
+        """
+        pass
+
+
+class Residence(Model):
     rfid = models.CharField(primary_key=True, max_length=100)
 
     class Meta:
@@ -16,16 +35,11 @@ class Residence(models.Model):
         return self.rfid
 
     def get_recursive_pks(self):
-        """
-        Returns a list of primary keys of all recursive parents.
-        Used to determine the URL of an object.
-        """
         pks = [self.pk]
         return pks
 
 
-
-class User(models.Model):
+class User(Model):
     imei = models.CharField(primary_key=True, max_length=100)
     name = models.CharField(max_length=100)
     residence = models.ForeignKey('Residence', related_name='users')
@@ -33,10 +47,14 @@ class User(models.Model):
     class Meta:
         ordering = ('imei',)
 
+    def get_recursive_pks(self):
+        pks = self.residence.get_recursive_pks()
+        pks.append(self.pk)
+        return pks
 
-class Room(models.Model):
-    # id is automatically generated
-    # id = models.IntegerField(primary_key=True)
+
+class Room(Model):
+    # id is automatically generated if no other primary_key is defined
     name = models.CharField(max_length=100)
     residence = models.ForeignKey('Residence', related_name='rooms')
 
@@ -44,10 +62,6 @@ class Room(models.Model):
         ordering = ('name',)
 
     def get_recursive_pks(self):
-        """
-        Returns a list of primary keys of all recursive parents.
-        Used to determine the URL of an object.
-        """
         pks = self.residence.get_recursive_pks()
         pks.append(self.pk)
         return pks

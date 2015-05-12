@@ -9,8 +9,7 @@ class ViewRootTestCase(APITestCase):
         response = self.client.get('/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data,
-                         {'residence': 'http://testserver/residence/'})
+        self.assertEqual(response.data.get('residence'), 'http://testserver/residence/')
 
 
 class ViewResidenceTestCase(APITestCase):
@@ -65,9 +64,8 @@ class ViewResidenceTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data.get('rfid'), '3')
 
-        queryset = models.Residence.objects.all().filter(rfid='3')
-        self.assertEqual(len(queryset), 1)
-        self.assertEqual(queryset[0].rfid, '3')
+        residence = models.Residence.objects.get(rfid='3')
+        self.assertEqual(residence.rfid, '3')
 
     def test_update_residence(self):
         residence = models.Residence.objects.create(rfid='3')
@@ -75,20 +73,23 @@ class ViewResidenceTestCase(APITestCase):
         response = self.client.put('/residence/3/', {'rfid': '42'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        queryset = models.Residence.objects.all().filter(rfid='42')
-        self.assertEqual(len(queryset), 1)
-        self.assertEqual(queryset[0].rfid, '42')
+
+        residence = models.Residence.objects.get(rfid='42')
+        self.assertEqual(residence.rfid, '42')
 
     def test_destroy_residence(self):
         residence = models.Residence.objects.create(rfid='3')
-        queryset = models.Residence.objects.all().filter(rfid='3')
-        self.assertEqual(len(queryset), 1)
-        self.assertEqual(queryset[0].rfid, '3')
+        self.assertEqual(residence.rfid, '3')
 
         response = self.client.delete('/residence/3/')
+
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        queryset = models.Residence.objects.all().filter(rfid='3')
+
+        queryset = models.Residence.objects.filter(rfid='3')
         self.assertEqual(len(queryset), 0)
+
+
+# TODO add tests for user resource
 
 
 class ViewRoomTestCase(APITestCase):
@@ -112,8 +113,7 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0].get('name'), 'Dining Room')
-        self.assertEqual(response.data[0].get('residence'), 'http://testserver/residence/3/')
-        self.assertEqual(response.data[0].get('residence_pk'), '3')
+        self.assertEqual(response.data[0].get('residence').get('url'), 'http://testserver/residence/3/')
 
     def test_get_room(self):
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
@@ -124,17 +124,7 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.data.get('id'), room.pk)
         self.assertEqual(response.data.get('url'), 'http://testserver/residence/3/room/%s/' % room.pk)
         self.assertEqual(response.data.get('name'), 'Dining Room')
-        self.assertEqual(response.data.get('residence'), 'http://testserver/residence/3/')
-        self.assertEqual(response.data.get('residence_pk'), '3')
-
-    def test_get_room_shows_thermostats(self):
-        room = models.Room.objects.create(residence=self.residence, name='Dining Room')
-        thermostat = models.Thermostat.objects.create(room=room, rfid='thermoX')
-
-        response = self.client.get('/residence/3/room/%s/' % room.pk)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data.get('thermostats_pk'), ['thermoX'])
+        self.assertEqual(response.data.get('residence').get('url'), 'http://testserver/residence/3/')
 
     def test_get_room_404(self):
         response = self.client.get('/residence/3/room/1/')
@@ -142,13 +132,8 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_room(self):
-        response = self.client.post('/residence/3/room/', {'name': 'Dining Room',
-                                                           'residence': 'http://testserver/residence/3/'})
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def test_create_room_requires_residence_data(self):
         response = self.client.post('/residence/3/room/', {'name': 'Dining Room'})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_update_room(self):
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')

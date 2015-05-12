@@ -5,12 +5,6 @@ from smart_heating.models import *
 
 
 class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
-    # rooms = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    # users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    # TODO reference rooms per URL using a custom Field
-    # http://www.django-rest-framework.org/api-guide/relations/#advanced-hyperlinked-fields
-    # rooms = serializers.HyperlinkedRelatedField(many=True, view_name='room-detail',
-    #                                             lookup_url_kwarg='residence', read_only=True)
     rooms_url = serializers.HyperlinkedIdentityField(view_name='room-list', lookup_url_kwarg='residence_pk')
     users_url = serializers.HyperlinkedIdentityField(view_name='user-list', lookup_url_kwarg='residence_pk')
 
@@ -19,23 +13,23 @@ class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('rfid', 'url', 'rooms_url', 'users_url')
 
 
-# TODO use a HyperlinkedModelSerializer
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    url = relations.HierarchicalHyperlinkedIdentityField(view_name='user-detail', read_only=True)
+    residence = ResidenceSerializer()
 
     class Meta:
         model = User
-        fields = ('imei', 'name', 'residence')
+        fields = ('imei', 'url', 'name', 'residence')
 
 
 class RoomSerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='room-detail', read_only=True)
-    residence_pk = serializers.PrimaryKeyRelatedField(source='residence', read_only=True)
-    thermostats_pk = serializers.PrimaryKeyRelatedField(source='thermostats', many=True, read_only=True)
-    # TODO thermostats as urls
+    residence = ResidenceSerializer(read_only=True)
+    thermostats_url = relations.HierarchicalHyperlinkedIdentityField(source='thermostats', view_name='thermostat-list', read_only=True)
 
     class Meta:
         model = Room
-        fields = ('id', 'url', 'name', 'residence', 'residence_pk', 'thermostats_pk')
+        fields = ('id', 'url', 'name', 'residence', 'thermostats_url')
 
 
 class ThermostatSerializer(serializers.HyperlinkedModelSerializer):
