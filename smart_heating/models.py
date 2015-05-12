@@ -91,3 +91,8 @@ class Temperature(models.Model):
 
     class Meta:
         ordering = ('datetime',)
+
+    def get_recursive_pks(self):
+        pks = self.thermostat.get_recursive_pks()
+        pks.append(self.pk)
+        return pks

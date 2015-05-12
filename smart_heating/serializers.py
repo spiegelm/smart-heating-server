@@ -45,9 +45,9 @@ class ThermostatSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TemperatureSerializer(serializers.HyperlinkedModelSerializer):
-    url = relations.HierarchicalHyperlinkedIdentityField(view_name='termperature-detail', read_only=True)
+    url = relations.HierarchicalHyperlinkedIdentityField(view_name='temperature-detail', read_only=True)
     thermostat = ThermostatSerializer(read_only=True)
 
     class Meta:
         model = Temperature
-        fields = ('datetime', 'value', 'thermostat_pk')
+        fields = ('datetime', 'url', 'value', 'thermostat')
