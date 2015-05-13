@@ -84,7 +84,7 @@ class Thermostat(Model):
         return pks
 
 
-class Temperature(models.Model):
+class Temperature(Model):
     datetime = models.DateTimeField(primary_key=True)
     value = models.FloatField()
     thermostat = models.ForeignKey('Thermostat', related_name='temperatures')
