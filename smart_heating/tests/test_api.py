@@ -142,6 +142,9 @@ class ViewUserTestCase(APITestCase):
         self.assertEqual(user.imei, '123')
         self.assertEqual(user.name, 'Le Me')
 
+    # TODO test_update_user
+    # TODO test_destroy_user
+
 
 class ViewRoomTestCase(APITestCase):
 
@@ -277,6 +280,8 @@ class ViewThermostatTestCase(APITestCase):
         self.assertEqual(len(queryset), 1)
         self.assertEqual(queryset[0].rfid, '42')
 
+    # TODO test_destroy_thermostat
+
 
 class ViewTemperatureTestCase(APITestCase):
 
@@ -295,13 +300,73 @@ class ViewTemperatureTestCase(APITestCase):
         self.assertEqual(result.status_code, status.HTTP_200_OK)
         self.assertEqual(result.data, [])
 
+    def test_temperature_collection_contains_temperature_representations(self):
+        date0 = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        date1 = datetime.datetime(2015, 5, 13, 8, 0, 0, 0, timezone.get_current_timezone())
+        temperature0 = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date0, value=36.1)
+        temperature1 = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date1, value=36.4)
+
+        response_temp0 = self.client.get('/residence/3/room/1/thermostat/5/temperature/%s/' % date0.isoformat())
+        response_temp1 = self.client.get('/residence/3/room/1/thermostat/5/temperature/%s/' % date1.isoformat())
+        response = self.client.get('/residence/3/room/1/thermostat/5/temperature/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data[0], response_temp0.data)
+        self.assertEqual(response.data[1], response_temp1.data)
+
     def test_get_temperature_representation_contains_datetime_and_value(self):
         date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
-        temperature = models.Temperature.objects.create(thermostat=self.thermostat,
-                                                        datetime=date, value=36.1)
+        temperature = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date, value=36.1)
 
         response = self.client.get('/residence/3/room/1/thermostat/5/temperature/%s/' % date.isoformat())
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('url'),
+                         'http://testserver/residence/3/room/1/thermostat/5/temperature/%s/' % date.isoformat())
+        self.assertEqual(response.data.get('thermostat').get('url'),
+                         'http://testserver/residence/3/room/1/thermostat/5/')
         self.assertEqual(response.data.get('datetime'), '2015-05-13T07:00:00Z')
         self.assertEqual(response.data.get('value'), 36.1)
+
+    def test_create_temperature(self):
+        date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        temperature_data = {'datetime': date.isoformat(), 'value': 25.3}
+        response = self.client.post('/residence/3/room/1/thermostat/5/temperature/', temperature_data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Check stored values
+        temperature = models.Temperature.objects.get(datetime=date.isoformat())
+        self.assertEqual(temperature.datetime.isoformat(), date.isoformat())
+        self.assertEqual(temperature.value, 25.3)
+        self.assertEqual(temperature.thermostat, self.thermostat)
+
+    def test_update_temperature(self):
+        date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        temperature = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date, value=36.1)
+
+        new_date = date + datetime.timedelta(days=1)
+        data = {'datetime': new_date, 'value': 22.5}
+        response = self.client.put('/residence/3/room/1/thermostat/5/temperature/%s/' % date.isoformat(), data)
+
+        # Check stored values
+        temperature = models.Temperature.objects.get(datetime=new_date.isoformat())
+        self.assertEqual(temperature.datetime.isoformat(), '2015-05-14T07:00:00+00:00')
+        self.assertEqual(temperature.value, 22.5)
+        self.assertEqual(temperature.thermostat, self.thermostat)
+
+    def test_destroy_temperature(self):
+        date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        temperature = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date, value=36.1)
+
+        queryset = models.Temperature.objects.filter(datetime=date)
+        self.assertEqual(len(queryset), 1)
+
+        response = self.client.delete('/residence/3/room/1/thermostat/5/temperature/%s/' % date.isoformat())
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        queryset = models.Temperature.objects.filter(datetime=date)
+        self.assertEqual(len(queryset), 0)
+
+    # TODO test_get_latest_temperature
