@@ -94,5 +94,6 @@ class Temperature(models.Model):
 
     def get_recursive_pks(self):
         pks = self.thermostat.get_recursive_pks()
-        pks.append(self.pk)
+        assert(self.pk == self.datetime)
+        pks.append(self.datetime.isoformat())
         return pks
