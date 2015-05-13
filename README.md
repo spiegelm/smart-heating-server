@@ -1,4 +1,4 @@
-# smart-heating-server
+# smart-heating-server [![Build Status](https://magnum.travis-ci.com/spiegelm/smart-heating-server.svg?token=uqu5q9gC3ZDdywezju6y&branch=master)](https://magnum.travis-ci.com/spiegelm/smart-heating-server)
 
 This is the repository for the server part of the Distributed System Laboratory project Smart Heating.
 
