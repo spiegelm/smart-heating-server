@@ -10,7 +10,8 @@ router.register(r'residence/(?P<residence_pk>[^/.]+)/room/(?P<room_pk>[^/.]+)/'
                 r'thermostat', views.ThermostatViewSet)
 router.register(r'residence/(?P<residence_pk>[^/.]+)/room/(?P<room_pk>[^/.]+)/'
                 r'thermostat/(?P<thermostat_pk>[^/.]+)/temperature', views.TemperatureViewSet)
-
+router.register(r'device/raspberry', views.RaspberryDeviceViewSet)
+router.register(r'device/thermostat', views.ThermostatDeviceViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

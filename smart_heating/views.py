@@ -85,3 +85,16 @@ class TemperatureViewSet(viewsets.ModelViewSet):
         thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
         # Add residence information to the serializer
         serializer.save(thermostat=thermostat)
+
+
+# TODO device lookup
+class RaspberryDeviceViewSet(viewsets.ModelViewSet):
+
+    queryset = RaspberryDevice.objects.all()
+    serializer_class = RaspberryDeviceSerializer
+
+
+class ThermostatDeviceViewSet(viewsets.ModelViewSet):
+
+    queryset = ThermostatDevice.objects.all()
+    serializer_class = ThermostatDeviceSerializer

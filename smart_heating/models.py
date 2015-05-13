@@ -97,3 +97,40 @@ class Temperature(Model):
         assert(self.pk == self.datetime)
         pks.append(self.datetime.isoformat())
         return pks
+
+
+class Device(Model):
+    __metaclass__ = ABCMeta
+
+    rfid = models.CharField(primary_key=True, max_length=100)
+    mac = models.CharField(max_length=17, unique=True)
+
+    class Meta:
+        abstract = True
+
+    def get_recursive_pks(self):
+        return [self.pk]
+
+
+class RaspberryDevice(Device):
+
+    @property
+    def residence(self):
+        residences = Residence.objects.filter(rfid=self.rfid)
+        assert(0 <= len(residences) <= 1)
+        if len(residences) > 0:
+            return residences[0]
+        else:
+            return None
+
+
+class ThermostatDevice(Device):
+
+    @property
+    def thermostat(self):
+        thermostats = Thermostat.objects.filter(rfid=self.rfid)
+        assert(0 <= len(thermostats) <= 1)
+        if len(thermostats) > 0:
+            return thermostats[0]
+        else:
+            return None
