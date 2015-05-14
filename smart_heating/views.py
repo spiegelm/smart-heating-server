@@ -85,10 +85,7 @@ class TemperatureViewSet(viewsets.ModelViewSet):
         serializer.save(thermostat=thermostat)
 
 
-class RaspberryDeviceViewSet(viewsets.ModelViewSet):
-
-    queryset = RaspberryDevice.objects.all()
-    serializer_class = RaspberryDeviceSerializer
+class DeviceLookupMixin(viewsets.ModelViewSet):
 
     @list_route(methods=['get'], url_path='lookup')
     def lookup(self, request, *args, **kwargs):
@@ -100,7 +97,15 @@ class RaspberryDeviceViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class ThermostatDeviceViewSet(viewsets.ModelViewSet):
+class RaspberryDeviceViewSet(DeviceLookupMixin,
+                             viewsets.ModelViewSet):
+
+    queryset = RaspberryDevice.objects.all()
+    serializer_class = RaspberryDeviceSerializer
+
+
+class ThermostatDeviceViewSet(DeviceLookupMixin,
+                              viewsets.ModelViewSet):
 
     queryset = ThermostatDevice.objects.all()
     serializer_class = ThermostatDeviceSerializer
