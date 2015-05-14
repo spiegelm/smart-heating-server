@@ -56,6 +56,7 @@ class TemperatureSerializer(serializers.HyperlinkedModelSerializer):
 class RaspberryDeviceSerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='raspberrydevice-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
+    # TODO validate MAC field
 
     class Meta:
         model = RaspberryDevice
@@ -65,6 +66,7 @@ class RaspberryDeviceSerializer(serializers.HyperlinkedModelSerializer):
 class ThermostatDeviceSerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostatdevice-detail', read_only=True)
     thermostat = ThermostatSerializer(read_only=True)
+    # TODO validate MAC field
 
     class Meta:
         model = ThermostatDevice
