@@ -1,9 +1,7 @@
-# Create your views here.
-
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework.decorators import list_route
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 
 from smart_heating.serializers import *
 
@@ -87,11 +85,19 @@ class TemperatureViewSet(viewsets.ModelViewSet):
         serializer.save(thermostat=thermostat)
 
 
-# TODO device lookup
 class RaspberryDeviceViewSet(viewsets.ModelViewSet):
 
     queryset = RaspberryDevice.objects.all()
     serializer_class = RaspberryDeviceSerializer
+
+    @list_route(methods=['get'], url_path='lookup')
+    def lookup(self, request, *args, **kwargs):
+        mac = request.GET.get('mac')
+        if mac is None:
+            return Response(status=400, data={'mac': ['This field is required']})
+        device = get_object_or_404(self.get_queryset(), mac=mac)
+        serializer = self.get_serializer(device)
+        return Response(serializer.data)
 
 
 class ThermostatDeviceViewSet(viewsets.ModelViewSet):
