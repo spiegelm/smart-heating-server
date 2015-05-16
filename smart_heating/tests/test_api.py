@@ -305,8 +305,8 @@ class ViewTemperatureTestCase(APITestCase):
         """
         Temperature collection contains temperature representations ordered by datetime
         """
-        date0 = datetime.datetime(2015, 5, 13, 8, 0, 0, 0, timezone.get_current_timezone())
-        date1 = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        date0 = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        date1 = datetime.datetime(2015, 5, 13, 8, 0, 0, 0, timezone.get_current_timezone())
         temperature0 = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date0, value=36.1)
         temperature1 = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date1, value=36.4)
 
@@ -314,11 +314,12 @@ class ViewTemperatureTestCase(APITestCase):
         response_temp1 = self.client.get('/residence/3/room/1/thermostat/5/temperature/%s/' % date1.isoformat())
         response = self.client.get('/residence/3/room/1/thermostat/5/temperature/')
 
+        expected_results = [response_temp0.data, response_temp1.data]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('count'), 2)
         self.assertEqual(response.data.get('next_url'), None)
-        self.assertEqual(response.data.get('results')[0], response_temp0.data)
-        self.assertEqual(response.data.get('results')[1], response_temp1.data)
+        self.assertEqual(response.data.get('results'), expected_results)
 
     def test_get_temperature_representation_contains_datetime_and_value(self):
         date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
