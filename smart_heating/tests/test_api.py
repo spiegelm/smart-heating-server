@@ -375,4 +375,18 @@ class ViewTemperatureTestCase(APITestCase):
         queryset = models.Temperature.objects.filter(datetime=date)
         self.assertEqual(len(queryset), 0)
 
-    # TODO test_get_latest_temperature
+    def test_get_latest_temperature(self):
+        date0 = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        date1 = datetime.datetime(2015, 5, 14, 7, 0, 0, 0, timezone.get_current_timezone())
+        temperature0 = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date0, value=36.1)
+        temperature1 = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date1, value=36.1)
+
+        response = self.client.get('/residence/3/room/1/thermostat/5/temperature/latest/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('datetime'), '2015-05-14T07:00:00Z')
+
+    def test_get_latest_temperature_without_temperatures_results_in_404(self):
+        response = self.client.get('/residence/3/room/1/thermostat/5/temperature/latest/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
