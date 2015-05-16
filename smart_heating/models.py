@@ -90,7 +90,7 @@ class Temperature(Model):
     thermostat = models.ForeignKey('Thermostat', related_name='temperatures')
 
     class Meta:
-        ordering = ('datetime',)
+        ordering = ('-datetime',)
 
     def get_recursive_pks(self):
         pks = self.thermostat.get_recursive_pks()
