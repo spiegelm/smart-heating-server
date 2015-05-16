@@ -44,9 +44,19 @@ class ThermostatSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('rfid', 'url', 'room', 'temperatures_url')
 
 
+class SimpleThermostatSerializer(ThermostatSerializer):
+    """
+    For a simplified representation
+    """
+    class Meta:
+        model = Thermostat
+        fields = ('url',)
+
+
 class TemperatureSerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='temperature-detail', read_only=True)
-    thermostat = ThermostatSerializer(read_only=True)
+    # Use the simplified serializer for a smaller payload size
+    thermostat = SimpleThermostatSerializer(read_only=True)
 
     class Meta:
         model = Temperature
