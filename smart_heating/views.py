@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
+from project.pagination import CustomPagination
 
 from smart_heating.serializers import *
 
@@ -68,6 +69,7 @@ class TemperatureViewSet(viewsets.ModelViewSet):
 
     queryset = Temperature.objects.all()
     serializer_class = TemperatureSerializer
+    pagination_class = CustomPagination
 
     # Allow dots in the lookup value
     # The datetime primary key uses a dot to format milliseconds

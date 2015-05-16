@@ -294,15 +294,19 @@ class ViewTemperatureTestCase(APITestCase):
         self.room = models.Room.objects.create(residence=self.residence, name='fancy room name')
         self.thermostat = models.Thermostat.objects.create(room=self.room, rfid='5')
 
-    def test_list_temperature_empty(self):
+    def test_list_temperature_empty_has_pagination(self):
         result = self.client.get('/residence/3/room/1/thermostat/5/temperature/')
 
         self.assertEqual(result.status_code, status.HTTP_200_OK)
-        self.assertEqual(result.data, [])
+        empty_pagination_result = {'count': 0, 'next_url': None, 'previous_url': None, 'results': []}
+        self.assertEqual(result.data, empty_pagination_result)
 
     def test_temperature_collection_contains_temperature_representations(self):
-        date0 = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
-        date1 = datetime.datetime(2015, 5, 13, 8, 0, 0, 0, timezone.get_current_timezone())
+        """
+        Temperature collection contains temperature representations ordered by datetime
+        """
+        date0 = datetime.datetime(2015, 5, 13, 8, 0, 0, 0, timezone.get_current_timezone())
+        date1 = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
         temperature0 = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date0, value=36.1)
         temperature1 = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date1, value=36.4)
 
@@ -311,9 +315,10 @@ class ViewTemperatureTestCase(APITestCase):
         response = self.client.get('/residence/3/room/1/thermostat/5/temperature/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
-        self.assertEqual(response.data[0], response_temp0.data)
-        self.assertEqual(response.data[1], response_temp1.data)
+        self.assertEqual(response.data.get('count'), 2)
+        self.assertEqual(response.data.get('next_url'), None)
+        self.assertEqual(response.data.get('results')[0], response_temp0.data)
+        self.assertEqual(response.data.get('results')[1], response_temp1.data)
 
     def test_get_temperature_representation_contains_datetime_and_value(self):
         date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
