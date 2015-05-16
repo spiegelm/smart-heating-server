@@ -1,3 +1,4 @@
+from django.http.response import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import list_route
@@ -89,6 +90,14 @@ class TemperatureViewSet(viewsets.ModelViewSet):
         thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
         # Add residence information to the serializer
         serializer.save(thermostat=thermostat)
+
+    @list_route(methods=['get'], url_path='latest')
+    def latest(self, request, *args, **kwargs):
+        temperatures = self.get_queryset().order_by('-datetime')
+        if len(temperatures) == 0:
+            raise Http404('There are no temperatures.')
+        latest_temperature = temperatures[0]
+        return Response(self.get_serializer(latest_temperature).data)
 
 
 class DeviceLookupMixin(viewsets.ModelViewSet):
