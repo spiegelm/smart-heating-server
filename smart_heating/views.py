@@ -69,6 +69,10 @@ class TemperatureViewSet(viewsets.ModelViewSet):
     queryset = Temperature.objects.all()
     serializer_class = TemperatureSerializer
 
+    # Allow dots in the lookup value
+    # The datetime primary key uses a dot to format milliseconds
+    lookup_value_regex = '[^/]+'
+
     def get_queryset(self):
         residence_pk = self.kwargs.get('residence_pk')
         room_pk = self.kwargs.get('room_pk')
