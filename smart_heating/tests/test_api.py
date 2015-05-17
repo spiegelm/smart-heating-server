@@ -105,6 +105,11 @@ class ViewUserTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
+    def test_list_users_of_non_existent_residence(self):
+        response = self.client.get('/residence/not-a-residence/user/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_user_collection_contains_user_representations(self):
         user0 = models.User.objects.create(residence=self.residence, imei='123', name='Le Me')
         user1 = models.User.objects.create(residence=self.residence, imei='456', name='El user')
@@ -129,6 +134,14 @@ class ViewUserTestCase(APITestCase):
 
     def test_get_non_existent_user_imei_results_in_404(self):
         response = self.client.get('/residence/3/user/123/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_user_of_unrelated_residence_404(self):
+        unrelated_residence = models.Residence.objects.create(rfid='unrelated')
+        user = models.User.objects.create(residence=self.residence, imei='123', name='Le Me')
+
+        response = self.client.get('/residence/unrelated/user/123/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -159,6 +172,11 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
+    def test_list_rooms_of_non_existent_residence(self):
+        response = self.client.get('/residence/not-a-residence/room/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_list_single_room(self):
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
 
@@ -182,6 +200,14 @@ class ViewRoomTestCase(APITestCase):
 
     def test_get_room_404(self):
         response = self.client.get('/residence/3/room/1/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_room_of_unrelated_residence_404(self):
+        unrelated_residence = models.Residence.objects.create(rfid='unrelated')
+        room = models.Room.objects.create(residence=self.residence, name='Dining Room')
+
+        response = self.client.get('/residence/unrelated/room/%s/' % room.pk)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -232,6 +258,16 @@ class ViewThermostatTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
+    def test_list_thermostats_of_non_existent_residence(self):
+        response = self.client.get('/residence/not-a-residence/room/1/thermostat/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_list_thermostats_of_non_existent_room(self):
+        response = self.client.get('/residence/3/room/999/thermostat/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_list_single_thermostat(self):
         thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
 
@@ -255,6 +291,22 @@ class ViewThermostatTestCase(APITestCase):
 
     def test_get_thermostat_404(self):
         response = self.client.get('/residence/3/room/1/thermostat/8/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_thermostat_of_unrelated_residence_404(self):
+        unrelated_residence = models.Residence.objects.create(rfid='unrelated')
+        thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
+
+        response = self.client.get('/residence/unrelated/room/1/thermostat/7e/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_thermostat_of_unrelated_room_404(self):
+        unrelated_room = models.Room.objects.create(residence=self.residence, name='Unrelated Room')
+        thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
+
+        response = self.client.get('/residence/unrelated/room/%s/thermostat/7e/' % unrelated_room.pk)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -294,12 +346,41 @@ class ViewTemperatureTestCase(APITestCase):
         self.room = models.Room.objects.create(residence=self.residence, name='fancy room name')
         self.thermostat = models.Thermostat.objects.create(room=self.room, rfid='5')
 
-    def test_list_temperature_empty_has_pagination(self):
+    def test_list_temperatures_empty_with_pagination(self):
         result = self.client.get('/residence/3/room/1/thermostat/5/temperature/')
 
         self.assertEqual(result.status_code, status.HTTP_200_OK)
         empty_pagination_result = {'count': 0, 'next_url': None, 'previous_url': None, 'results': []}
         self.assertEqual(result.data, empty_pagination_result)
+
+    def test_list_temperatures_of_non_existent_residence(self):
+        response = self.client.get('/residence/not-a-residence/room/1/thermostat/5/temperature/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_list_temperatures_of_non_existent_room(self):
+        response = self.client.get('/residence/3/room/999/thermostat/5/temperature/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_list_temperatures_of_non_existent_thermostat(self):
+        response = self.client.get('/residence/3/room/1/thermostat/999/temperature/')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_list_temperatures_of_unrelated_residence_404(self):
+        unrelated_residence = models.Residence.objects.create(rfid='UNRELATED')
+
+        self.assertEqual(self.client.get('/residence/3/room/1/thermostat/5/temperature/').status_code, status.HTTP_200_OK)
+        self.assertEqual(self.client.get('/residence/UNRELATED/room/').status_code, status.HTTP_200_OK)
+        self.assertEqual(self.client.get('/residence/UNRELATED/room/1/thermostat/5/temperature/').status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_list_temperatures_of_unrelated_room_404(self):
+        unrelated_room = models.Room.objects.create(residence=self.residence, name='Unrelated Room')
+
+        response = self.client.get('/residence/3/room/%s/thermostat/5/temperature/' % unrelated_room.pk)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_temperature_collection_contains_temperature_representations(self):
         """
@@ -334,6 +415,25 @@ class ViewTemperatureTestCase(APITestCase):
                          'http://testserver/residence/3/room/1/thermostat/5/')
         self.assertEqual(response.data.get('datetime'), '2015-05-13T07:00:00Z')
         self.assertEqual(response.data.get('value'), 36.1)
+
+    def test_get_temperature_404(self):
+        date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+
+        response = self.client.get('/residence/3/room/1/thermostat/5/temperature/%s/' % date.isoformat())
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_temperature_of_unrelated_thermostat_404(self):
+        unrelated_thermostat = models.Thermostat.objects.create(room=self.room, rfid='UNRELATED')
+        date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        temperature = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date, value=36.1)
+
+        self.assertEqual(self.client.get('/residence/3/room/1/thermostat/5/temperature/')
+                         .status_code, status.HTTP_200_OK)
+        self.assertEqual(self.client.get('/residence/3/room/1/thermostat/UNRELATED/temperature/')
+                         .status_code, status.HTTP_200_OK)
+        self.assertEqual(self.client.get('/residence/3/room/1/thermostat/UNRELATED/temperature/%s/' % date.isoformat())
+                         .status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_temperature(self):
         date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
