@@ -23,6 +23,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         residence_pk = self.kwargs['residence_pk']
+        get_object_or_404(Residence.objects.all(), pk=residence_pk)
         return User.objects.filter(residence=residence_pk)
 
     def perform_create(self, serializer):
@@ -39,6 +40,7 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         residence_pk = self.kwargs.get('residence_pk')
+        get_object_or_404(Residence.objects.all(), pk=residence_pk)
         return Room.objects.filter(residence=residence_pk)
 
     def perform_create(self, serializer):
@@ -60,7 +62,7 @@ class ThermostatViewSet(viewsets.ModelViewSet):
         return Thermostat.objects.filter(room=room_pk)
 
     def perform_create(self, serializer):
-        # Grab residence from kwargs provided by the router
+        # Grab room from kwargs provided by the router
         room = Room.objects.get(pk=self.kwargs.get('room_pk'))
         # Add residence information to the serializer
         serializer.save(room=room)
@@ -86,7 +88,7 @@ class TemperatureViewSet(viewsets.ModelViewSet):
         return Temperature.objects.filter(thermostat=thermostat_pk)
 
     def perform_create(self, serializer):
-        # Grab residence from kwargs provided by the router
+        # Grab thermostat from kwargs provided by the router
         thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
         # Add residence information to the serializer
         serializer.save(thermostat=thermostat)
