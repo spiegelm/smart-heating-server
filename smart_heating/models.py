@@ -123,6 +123,18 @@ class RaspberryDevice(Device):
         else:
             return None
 
+    @property
+    def thermostat_devices(self):
+        residence = self.residence
+        if residence is None:
+            return None
+        rooms = Room.objects.filter(residence=residence)
+        room_pks = [room.pk for room in rooms]
+        thermostats = Thermostat.objects.filter(room__in=room_pks)
+        thermostat_rfids = [thermostat.rfid for thermostat in thermostats]
+        thermostat_devices = ThermostatDevice.objects.filter(rfid__in=thermostat_rfids)
+        return thermostat_devices
+
 
 class ThermostatDevice(Device):
 
