@@ -490,3 +490,13 @@ class ViewTemperatureTestCase(APITestCase):
         response = self.client.get('/residence/3/room/1/thermostat/5/temperature/latest/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class ViewRaspberryDeviceTestCase(APITestCase):
+    # TODO test raspberry device
+    pass
+
+
+class ViewThermostatDeviceTestCase(APITestCase):
+    # TODO test raspberry device
+    pass
