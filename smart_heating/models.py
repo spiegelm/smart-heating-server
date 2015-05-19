@@ -5,7 +5,7 @@ from abc import ABCMeta, abstractmethod
 # Create your models here.
 
 
-alpha_numeric_validator = validators.RegexValidator(r'^[0-9a-zA-Z]$')
+alpha_numeric_validator = validators.RegexValidator(r'^[0-9a-zA-Z]+$', 'Only alphanumeric characters are allowed.')
 rfid_validator = alpha_numeric_validator
 
 class Model(models.Model):
