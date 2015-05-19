@@ -1,8 +1,12 @@
+from django.core import validators
 from django.db import models
 from abc import ABCMeta, abstractmethod
 
 # Create your models here.
 
+
+alpha_numeric_validator = validators.RegexValidator(r'^[0-9a-zA-Z]$')
+rfid_validator = alpha_numeric_validator
 
 class Model(models.Model):
     __metaclass__ = ABCMeta
@@ -23,7 +27,7 @@ class Model(models.Model):
 
 
 class Residence(Model):
-    rfid = models.CharField(primary_key=True, max_length=100)
+    rfid = models.CharField(primary_key=True, max_length=100, validators=[rfid_validator])
 
     class Meta:
         ordering = ('rfid',)
@@ -40,7 +44,7 @@ class Residence(Model):
 
 
 class User(Model):
-    imei = models.CharField(primary_key=True, max_length=100)
+    imei = models.CharField(primary_key=True, max_length=100, validators=[alpha_numeric_validator])
     name = models.CharField(max_length=100)
     residence = models.ForeignKey('Residence', related_name='users')
 
@@ -72,7 +76,7 @@ class Room(Model):
 
 
 class Thermostat(Model):
-    rfid = models.CharField(primary_key=True, max_length=100)
+    rfid = models.CharField(primary_key=True, max_length=100, validators=[rfid_validator])
     room = models.ForeignKey('Room', related_name='thermostats')
 
     class Meta:
@@ -85,6 +89,7 @@ class Thermostat(Model):
 
 
 class Temperature(Model):
+    # TODO test datetime validation
     datetime = models.DateTimeField(primary_key=True)
     value = models.FloatField()
     thermostat = models.ForeignKey('Thermostat', related_name='temperatures')
@@ -102,7 +107,7 @@ class Temperature(Model):
 class Device(Model):
     __metaclass__ = ABCMeta
 
-    rfid = models.CharField(primary_key=True, max_length=100)
+    rfid = models.CharField(primary_key=True, max_length=100, validators=[rfid_validator])
     mac = models.CharField(max_length=17, unique=True)
 
     class Meta:
