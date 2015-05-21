@@ -85,3 +85,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 TEST_RUNNER = 'project.runner.ColouredTestRunner'
+
+from smart_heating.settings import *
