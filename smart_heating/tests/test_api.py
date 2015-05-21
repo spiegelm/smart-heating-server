@@ -4,6 +4,7 @@ from smart_heating import models
 
 from django.utils import timezone
 import datetime
+from smart_heating.models import HeatingTableEntry
 
 
 class ViewRootTestCase(APITestCase):
@@ -490,6 +491,33 @@ class ViewTemperatureTestCase(APITestCase):
         response = self.client.get('/residence/3/room/1/thermostat/5/temperature/latest/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class HeatingTableTestCase(APITestCase):
+
+    def setUp(self):
+        self.residence = models.Residence.objects.create(rfid='3')
+        self.room = models.Room.objects.create(residence=self.residence, name='fancy room name')
+        self.thermostat = models.Thermostat.objects.create(room=self.room, rfid='5')
+
+    def test_heating_table_entry_representation(self):
+        time = datetime.datetime(2000, 1, 1, 13, 45, 0).time()
+        entry = HeatingTableEntry.objects.create(thermostat=self.thermostat, day='Mon', time=time, temperature=23.0)
+
+        response = self.client.get('/residence/3/room/1/thermostat/5/heating_table/%s/' % entry.pk)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data.get('day'), 'Mon')
+        self.assertEqual(response.data.get('time'), '13:45:00')
+        self.assertEqual(response.data.get('thermostat').get('url'),
+                         'http://testserver/residence/3/room/1/thermostat/5/')
+
+    def test_create_heating_table_entry(self):
+
+        data = {'day': 'Mon', 'time': '13:45:00', 'temperature': 25.67}
+        response = self.client.post('/residence/3/room/1/thermostat/5/heating_table/', data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
 class ViewRaspberryDeviceTestCase(APITestCase):

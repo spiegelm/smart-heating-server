@@ -151,3 +151,50 @@ class ThermostatDevice(Device):
             return thermostats[0]
         else:
             return None
+
+
+class TimetableEntry(Model):
+    __metaclass__ = ABCMeta
+
+    DAY_IN_WEEK_CHOICES = [
+        ('Mon', 'Monday'),
+        ('Tue', 'Tuesday'),
+        ('Wed', 'Wednesday'),
+        ('Thu', 'Thursday'),
+        ('Fri', 'Friday'),
+        ('Sat', 'Saturday'),
+        ('Sub', 'Sunday'),
+    ]
+
+    day = models.CharField(max_length=3, choices=DAY_IN_WEEK_CHOICES)
+    time = models.TimeField()
+
+    class Meta:
+        abstract = True
+
+
+class HeatingTableEntry(TimetableEntry):
+
+    class Meta:
+        unique_together = ('day', 'time', 'thermostat')
+
+    temperature = models.FloatField()
+    thermostat = models.ForeignKey(Thermostat, related_name='heating_table_entries')
+
+    def get_recursive_pks(self):
+        pks = self.thermostat.get_recursive_pks()
+        pks.append(self.pk)
+        return pks
+
+
+class OccupancyPredictionEntry(TimetableEntry):
+
+    class Meta:
+        unique_together = ('day', 'time', 'user')
+
+    user = models.ForeignKey(User)
+
+    def get_recursive_pks(self):
+        pks = self.user.get_recursive_pks()
+        pks.append(self.pk)
+        return pks

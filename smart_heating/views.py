@@ -102,6 +102,28 @@ class TemperatureViewSet(viewsets.ModelViewSet):
         return Response(self.get_serializer(latest_temperature).data)
 
 
+# TODO make views readonly
+class HeatingTableEntryViewSet(viewsets.ModelViewSet):
+
+    queryset = HeatingTableEntry.objects.all()
+    serializer_class = HeatingTableEntrySerializer
+
+    def get_queryset(self):
+        residence_pk = self.kwargs.get('residence_pk')
+        room_pk = self.kwargs.get('room_pk')
+        thermostat_pk = self.kwargs.get('thermostat_pk')
+        # check residence, room and thermostat in hierarchy
+        get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
+        get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
+        return HeatingTableEntry.objects.filter(thermostat=thermostat_pk)
+
+    def perform_create(self, serializer):
+        # Grab thermostat from kwargs provided by the router
+        thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
+        # Add residence information to the serializer
+        serializer.save(thermostat=thermostat)
+
+
 class DeviceLookupMixin(viewsets.ModelViewSet):
 
     @list_route(methods=['get'], url_path='lookup')
