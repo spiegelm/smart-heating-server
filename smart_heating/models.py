@@ -17,6 +17,13 @@ class Model(models.Model):
     class Meta:
         abstract = True
 
+    def __repr__(self):
+        fields_string = ' '.join(['%s:"%s"' % (field.name, getattr(self, field.name)) for field in self._meta.fields])
+        return '<%s(%s)>' % (self.__class__._meta.object_name, fields_string)
+
+    def __str__(self):
+        return self.__repr__()
+
     @abstractmethod
     def get_recursive_pks(self):
         """
