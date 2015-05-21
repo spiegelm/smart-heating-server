@@ -1,4 +1,5 @@
 Django==1.8.1
+Markdown==2.6.2
 Pygments==2.0.2
 blessings==1.6
 colour-runner==0.0.4
