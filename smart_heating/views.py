@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
-from project.pagination import CustomPagination
 
+from smart_heating.pagination import TemperaturePagination
 from smart_heating.serializers import *
 
 
@@ -72,7 +72,6 @@ class TemperatureViewSet(viewsets.ModelViewSet):
 
     queryset = Temperature.objects.all()
     serializer_class = TemperatureSerializer
-    pagination_class = CustomPagination
 
     # Allow dots in the lookup value
     # The datetime primary key uses a dot to format milliseconds
@@ -100,6 +99,20 @@ class TemperatureViewSet(viewsets.ModelViewSet):
             raise Http404('There are no temperatures.')
         latest_temperature = temperatures[0]
         return Response(self.get_serializer(latest_temperature).data)
+
+    @property
+    def paginator(self):
+        """
+        The paginator instance associated with the view, or `None`.
+        """
+        # Override the paginator property to inject the kwargs to the paginator. This is required
+        # to generate the latest_temperature_url.
+        if not hasattr(self, '_paginator'):
+            if self.pagination_class is None:
+                self._paginator = None
+            else:
+                self._paginator = TemperaturePagination(kwargs=self.kwargs)
+        return self._paginator
 
 
 # TODO make views readonly
