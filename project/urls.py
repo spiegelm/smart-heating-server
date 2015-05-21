@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.http.response import HttpResponse
 from rest_framework import routers
 
 #from rest_framework import routers
@@ -17,5 +18,5 @@ from rest_framework import routers
 
 urlpatterns = [
     url(r'^', include('smart_heating.urls')),
+    url(r'^robots.txt$', lambda r: HttpResponse("User-agent: *\nDisallow: /"))
 ]
-
