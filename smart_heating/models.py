@@ -22,7 +22,7 @@ class Model(models.Model):
         return '<%s(%s)>' % (self.__class__._meta.object_name, fields_string)
 
     def __str__(self):
-        return self.__repr__()
+        return str(self.pk)
 
     @abstractmethod
     def get_recursive_pks(self):
@@ -38,12 +38,6 @@ class Residence(Model):
 
     class Meta:
         ordering = ('rfid',)
-
-    def __str__(self):
-        """
-        Used to generate the url
-        """
-        return self.rfid
 
     def get_recursive_pks(self):
         pks = [self.pk]
@@ -95,6 +89,7 @@ class Thermostat(Model):
         return pks
 
 
+# TODO use separate primary key and unique_together, as in HeatingTableEntry
 class Temperature(Model):
     # TODO test datetime validation
     datetime = models.DateTimeField(primary_key=True)
