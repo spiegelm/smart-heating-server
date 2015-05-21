@@ -18,5 +18,6 @@ from rest_framework import routers
 
 urlpatterns = [
     url(r'^', include('smart_heating.urls')),
-    url(r'^robots.txt$', lambda r: HttpResponse("User-agent: *\nDisallow: /"))
+    url(r'^admin/', include(admin.site.urls)),
+    url(r'^robots.txt$', lambda r: HttpResponse("User-agent: *\nDisallow: /")),
 ]
