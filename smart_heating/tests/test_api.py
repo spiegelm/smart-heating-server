@@ -351,9 +351,12 @@ class ViewTemperatureTestCase(APITestCase):
         result = self.client.get('/residence/3/room/1/thermostat/5/temperature/')
 
         self.assertEqual(result.status_code, status.HTTP_200_OK)
-        empty_pagination_result = {'count': 0, 'next_url': None, 'previous_url': None, 'results': [],
-                                   'latest_temperature_url': 'http://testserver/residence/3/room/1/thermostat/5/temperature/latest/'}
-        self.assertEqual(result.data, empty_pagination_result)
+        self.assertEqual(result.data.get('count'), 0)
+        self.assertEqual(result.data.get('next_url'), None)
+        self.assertEqual(result.data.get('previous_url'), None)
+        self.assertEqual(result.data.get('latest_temperature_url'), 'http://testserver/residence/3/room/1/thermostat/5/temperature/latest/')
+        self.assertEqual(result.data.get('chart_url'), 'http://testserver/residence/3/room/1/thermostat/5/temperature/chart/')
+        self.assertEqual(result.data.get('results'), [])
 
     def test_list_temperatures_of_non_existent_residence(self):
         response = self.client.get('/residence/not-a-residence/room/1/thermostat/5/temperature/')
