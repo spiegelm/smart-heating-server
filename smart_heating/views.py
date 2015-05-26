@@ -1,6 +1,6 @@
 from django.http.response import Http404
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from django.shortcuts import get_object_or_404, render
+from rest_framework import viewsets, renderers
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 
@@ -99,6 +99,13 @@ class TemperatureViewSet(viewsets.ModelViewSet):
             raise Http404('There are no temperatures.')
         latest_temperature = temperatures[0]
         return Response(self.get_serializer(latest_temperature).data)
+
+    @list_route(methods=['get'], url_path='chart', renderer_classes=[renderers.TemplateHTMLRenderer])
+    def chart(self, request, *args, **kwargs):
+        temperatures = self.get_queryset()
+        print(temperatures)
+        context = {'temperatures': [[int(t.datetime.timestamp()*1000), t.value] for t in temperatures]}
+        return render(request, 'smart_heating/temperature_chart.html', context)
 
     @property
     def paginator(self):

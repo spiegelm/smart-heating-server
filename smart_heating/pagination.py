@@ -10,10 +10,12 @@ class TemperaturePagination(pagination.LimitOffsetPagination):
 
     def __init__(self, kwargs):
         self.latest_temperature_url = None
+        self.chart_url = None
         self.kwargs = kwargs
 
     def paginate_queryset(self, queryset, request, view=None):
         self.latest_temperature_url = reverse('temperature-latest', kwargs=self.kwargs, request=request)
+        self.chart_url = reverse('temperature-chart', kwargs=self.kwargs, request=request)
         return super(TemperaturePagination, self).paginate_queryset(queryset, request, view)
 
     def get_paginated_response(self, data):
@@ -22,5 +24,6 @@ class TemperaturePagination(pagination.LimitOffsetPagination):
             ('next_url', self.get_next_link()),
             ('previous_url', self.get_previous_link()),
             ('latest_temperature_url', self.latest_temperature_url),
+            ('chart_url', self.chart_url),
             ('results', data)
         ]))

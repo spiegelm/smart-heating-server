@@ -1,0 +1,54 @@
+<html>
+<head>
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="http://code.highcharts.com/stock/2.1.5/highstock.js"></script>
+</head>
+<body>
+    <div id="chart" style="height: 350px; min-width: 400px"></div>
+
+    <script>
+        $(function() {
+            $('#chart').highcharts('StockChart', {
+                chart:{
+                    zoomType: 'x'
+                },
+                rangeSelector: {
+                    buttons: [{
+                        type: 'hour',
+                        count: 3,
+                        text: '3h'
+                    }, {
+                        type: 'hour',
+                        count: 12,
+                        text: '12h'
+                    }, {
+                        type: 'day',
+                        count: 1,
+                        text: 'day'
+                    }, {
+                        type: 'week',
+                        count: 1,
+                        text: 'week'
+                    }, {
+                        type: 'all',
+                        text: 'all'
+                    }]
+                },
+                series: [{
+                    name: 'Name',
+                    data: {{ temperatures }}
+                }],
+                xAxis: {
+                    type: 'datetime',
+                    ordinal: false,
+                    minRange: 60 * 60 * 100 // 1h
+                },
+                yAxis: {
+                    floor: 16,
+{#                    max: 30#}
+                }
+            })
+        })
+    </script>
+</body>
+</html>
