@@ -4,7 +4,7 @@
     <script src="http://code.highcharts.com/stock/2.1.5/highstock.js"></script>
 </head>
 <body>
-    <div id="chart" style="height: 350px; min-width: 400px"></div>
+    <div id="chart" style="height: 500px; min-width: 400px"></div>
 
     <script>
         $(function() {
@@ -35,7 +35,7 @@
                     }]
                 },
                 series: [{
-                    name: 'Name',
+                    name: '{{ room.name }}' + ', {{ thermostat.rfid }}',
                     data: {{ temperatures }}
                 }],
                 xAxis: {

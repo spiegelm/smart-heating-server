@@ -78,13 +78,22 @@ class TemperatureViewSet(viewsets.ModelViewSet):
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
+        # check residence, room and thermostat in hierarchy
+        self.get_room()
+        self.get_thermostat()
+        thermostat_pk = self.kwargs.get('thermostat_pk')
+        return Temperature.objects.filter(thermostat=thermostat_pk)
+
+    def get_room(self):
+        residence_pk = self.kwargs.get('residence_pk')
+        room_pk = self.kwargs.get('room_pk')
+        return get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
+
+    def get_thermostat(self):
         residence_pk = self.kwargs.get('residence_pk')
         room_pk = self.kwargs.get('room_pk')
         thermostat_pk = self.kwargs.get('thermostat_pk')
-        # check residence, room and thermostat in hierarchy
-        get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
-        get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
-        return Temperature.objects.filter(thermostat=thermostat_pk)
+        return get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
 
     def perform_create(self, serializer):
         # Grab thermostat from kwargs provided by the router
@@ -104,7 +113,11 @@ class TemperatureViewSet(viewsets.ModelViewSet):
     def chart(self, request, *args, **kwargs):
         temperatures = self.get_queryset()
         print(temperatures)
-        context = {'temperatures': [[int(t.datetime.timestamp()*1000), t.value] for t in temperatures]}
+        context = {
+            'temperatures': [[int(t.datetime.timestamp()*1000), t.value] for t in temperatures],
+            'room': self.get_room(),
+            'thermostat': self.get_thermostat()
+        }
         return render(request, 'smart_heating/temperature_chart.html', context)
 
     @property
