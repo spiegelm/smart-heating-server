@@ -135,7 +135,6 @@ class TemperatureViewSet(viewsets.ModelViewSet):
         return self._paginator
 
 
-# TODO make views readonly
 class HeatingTableEntryViewSet(viewsets.ModelViewSet):
 
     queryset = HeatingTableEntry.objects.all()
