@@ -158,14 +158,22 @@ class ThermostatDevice(Device):
 class TimetableEntry(Model):
     __metaclass__ = ABCMeta
 
+    MONDAY = 0
+    TUESDAY = 1
+    WEDNESDAY = 2
+    THURSDAY = 3
+    FRIDAY = 4
+    SATURDAY = 5
+    SUNDAY = 6
+
     DAY_IN_WEEK_CHOICES = [
-        ('Mon', 'Monday'),
-        ('Tue', 'Tuesday'),
-        ('Wed', 'Wednesday'),
-        ('Thu', 'Thursday'),
-        ('Fri', 'Friday'),
-        ('Sat', 'Saturday'),
-        ('Sub', 'Sunday'),
+        (MONDAY, 'Monday'),
+        (TUESDAY, 'Tuesday'),
+        (WEDNESDAY, 'Wednesday'),
+        (THURSDAY, 'Thursday'),
+        (FRIDAY, 'Friday'),
+        (SATURDAY, 'Saturday'),
+        (SUNDAY, 'Sunday'),
     ]
 
     day = models.CharField(max_length=3, choices=DAY_IN_WEEK_CHOICES)
@@ -179,6 +187,7 @@ class HeatingTableEntry(TimetableEntry):
 
     class Meta:
         unique_together = ('day', 'time', 'thermostat')
+        ordering = ('day', 'time')
 
     temperature = models.FloatField()
     thermostat = models.ForeignKey(Thermostat, related_name='heating_table_entries')
@@ -193,6 +202,7 @@ class OccupancyPredictionEntry(TimetableEntry):
 
     class Meta:
         unique_together = ('day', 'time', 'user')
+        ordering = ('day', 'time')
 
     user = models.ForeignKey(User)
 

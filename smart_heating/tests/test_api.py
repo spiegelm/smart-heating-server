@@ -4,7 +4,6 @@ from smart_heating import models
 
 from django.utils import timezone
 import datetime
-from smart_heating.models import HeatingTableEntry
 
 
 class ViewRootTestCase(APITestCase):
@@ -505,23 +504,49 @@ class HeatingTableTestCase(APITestCase):
         self.thermostat = models.Thermostat.objects.create(room=self.room, rfid='5')
 
     def test_heating_table_entry_representation(self):
+
         time = datetime.datetime(2000, 1, 1, 13, 45, 0).time()
-        entry = HeatingTableEntry.objects.create(thermostat=self.thermostat, day='Mon', time=time, temperature=23.0)
+        entry = models.HeatingTableEntry.objects.create(thermostat=self.thermostat,
+                                                        day=models.HeatingTableEntry.MONDAY, time=time, temperature=23.0)
 
         response = self.client.get('/residence/3/room/1/thermostat/5/heating_table/%s/' % entry.pk)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data.get('day'), 'Mon')
+        self.assertEqual(response.data.get('day'), models.HeatingTableEntry.MONDAY)
         self.assertEqual(response.data.get('time'), '13:45:00')
         self.assertEqual(response.data.get('thermostat').get('url'),
                          'http://testserver/residence/3/room/1/thermostat/5/')
 
     def test_create_heating_table_entry(self):
 
-        data = {'day': 'Mon', 'time': '13:45:00', 'temperature': 25.67}
+        data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 25.67}
         response = self.client.post('/residence/3/room/1/thermostat/5/heating_table/', data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_heating_table_entries_ordered_by_date_and_time(self):
+        time12 = datetime.datetime(2000, 1, 1, 12, 0, 0).time()
+        time13 = datetime.datetime(2000, 1, 1, 13, 0, 0).time()
+        entry_tue_13 = models.HeatingTableEntry.objects.create(\
+            thermostat=self.thermostat, day=models.HeatingTableEntry.TUESDAY, time=time13, temperature=23.0)
+        entry_tue_12 = models.HeatingTableEntry.objects.create(\
+            thermostat=self.thermostat, day=models.HeatingTableEntry.TUESDAY, time=time12, temperature=23.0)
+        entry_mon_12 = models.HeatingTableEntry.objects.create(\
+            thermostat=self.thermostat, day=models.HeatingTableEntry.MONDAY, time=time12, temperature=23.0)
+        entry_fri_13 = models.HeatingTableEntry.objects.create(\
+            thermostat=self.thermostat, day=models.HeatingTableEntry.FRIDAY, time=time13,temperature=23.0)
+        entry_mon_13 = models.HeatingTableEntry.objects.create(\
+            thermostat=self.thermostat, day=models.HeatingTableEntry.MONDAY, time=time13, temperature=23.0)
+
+        response = self.client.get('/residence/3/room/1/thermostat/5/heating_table/')
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response.data[0].get('id'), entry_mon_12.id)
+        self.assertEqual(response.data[1].get('id'), entry_mon_13.id)
+        self.assertEqual(response.data[2].get('id'), entry_tue_12.id)
+        self.assertEqual(response.data[3].get('id'), entry_tue_13.id)
+        self.assertEqual(response.data[4].get('id'), entry_fri_13.id)
 
 
 class ViewRaspberryDeviceTestCase(APITestCase):
@@ -530,5 +555,5 @@ class ViewRaspberryDeviceTestCase(APITestCase):
 
 
 class ViewThermostatDeviceTestCase(APITestCase):
-    # TODO test raspberry device
+    # TODO test thermostat device
     pass
