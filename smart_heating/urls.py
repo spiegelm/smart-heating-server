@@ -11,6 +11,8 @@ router.register(r'residence/(?P<residence_pk>[^/.]+)/room/(?P<room_pk>[^/.]+)/'
 router.register(r'residence/(?P<residence_pk>[^/.]+)/room/(?P<room_pk>[^/.]+)/'
                 r'thermostat/(?P<thermostat_pk>[^/.]+)/temperature', views.TemperatureViewSet)
 router.register(r'residence/(?P<residence_pk>[^/.]+)/room/(?P<room_pk>[^/.]+)/'
+                r'thermostat/(?P<thermostat_pk>[^/.]+)/meta_entry', views.ThermostatMetaEntryViewSet)
+router.register(r'residence/(?P<residence_pk>[^/.]+)/room/(?P<room_pk>[^/.]+)/'
                 r'thermostat/(?P<thermostat_pk>[^/.]+)/heating_table', views.HeatingTableEntryViewSet)
 router.register(r'device/raspberry', views.RaspberryDeviceViewSet)
 router.register(r'device/thermostat', views.ThermostatDeviceViewSet)

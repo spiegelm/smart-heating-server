@@ -106,6 +106,25 @@ class Temperature(Model):
         return pks
 
 
+class ThermostatMetaEntry(Model):
+
+    id = models.AutoField(primary_key=True)
+    datetime = models.DateTimeField()
+    rssi = models.IntegerField(null=True)
+    uptime = models.IntegerField(null=True)
+    battery = models.IntegerField(null=True)
+    thermostat = models.ForeignKey('Thermostat', related_name='meta_entries')
+
+    class Meta:
+        unique_together = ('thermostat', 'datetime')
+        ordering = ('datetime',)
+
+    def get_recursive_pks(self):
+        pks = self.thermostat.get_recursive_pks()
+        pks.append(self.pk)
+        return pks
+
+
 class Device(Model):
     __metaclass__ = ABCMeta
 

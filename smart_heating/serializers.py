@@ -38,13 +38,16 @@ class ThermostatSerializer(serializers.HyperlinkedModelSerializer):
     room = RoomSerializer(read_only=True)
     temperatures_url = relations.HierarchicalHyperlinkedIdentityField(source='temperatures',
                                                                       view_name='temperature-list', read_only=True)
+    meta_entries_url = relations.HierarchicalHyperlinkedIdentityField(source='meta_entries',
+                                                                    view_name='thermostatmetaentry-list',
+                                                                    read_only=True)
     heating_table_url = relations.HierarchicalHyperlinkedIdentityField(source='heating_table_entries',
                                                                        view_name='heatingtableentry-list',
                                                                        read_only=True)
 
     class Meta:
         model = Thermostat
-        fields = ('rfid', 'url', 'room', 'temperatures_url', 'heating_table_url')
+        fields = ('rfid', 'url', 'room', 'temperatures_url', 'meta_entries_url', 'heating_table_url')
 
 
 class SimpleThermostatSerializer(ThermostatSerializer):
@@ -73,6 +76,16 @@ class TemperatureSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Temperature
         fields = ('datetime', 'url', 'value', 'thermostat')
+
+
+class ThermostatMetaEntrySerializer(serializers.HyperlinkedModelSerializer):
+    url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostatmetaentry-detail', read_only=True)
+    # Use the simplified serializer for a smaller payload size
+    thermostat = SimpleThermostatSerializer()
+
+    class Meta:
+        model = ThermostatMetaEntry
+        fields = ('id', 'url', 'datetime', 'rssi', 'uptime', 'battery', 'thermostat')
 
 
 class ThermostatDeviceSerializer(serializers.HyperlinkedModelSerializer):

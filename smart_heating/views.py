@@ -73,8 +73,7 @@ class TemperatureViewSet(viewsets.ModelViewSet):
     queryset = Temperature.objects.all()
     serializer_class = TemperatureSerializer
 
-    # Allow dots in the lookup value
-    # The datetime primary key uses a dot to format milliseconds
+    # Allow dots in the lookup value as the datetime primary key uses a dot to represent milliseconds
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
@@ -98,7 +97,7 @@ class TemperatureViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Grab thermostat from kwargs provided by the router
         thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
-        # Add residence information to the serializer
+        # Add parent information to the serializer
         serializer.save(thermostat=thermostat)
 
     @list_route(methods=['get'], url_path='latest')
@@ -133,6 +132,50 @@ class TemperatureViewSet(viewsets.ModelViewSet):
             else:
                 self._paginator = TemperaturePagination(kwargs=self.kwargs)
         return self._paginator
+
+class ThermostatMetaEntryViewSet(viewsets.ModelViewSet):
+
+    queryset = ThermostatMetaEntry.objects.all()
+    serializer_class = ThermostatMetaEntrySerializer
+
+    def get_queryset(self):
+        # check residence, room and thermostat in hierarchy
+        residence_pk = self.kwargs.get('residence_pk')
+        room_pk = self.kwargs.get('room_pk')
+        thermostat_pk = self.kwargs.get('thermostat_pk')
+        get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
+        get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
+        return ThermostatMetaEntry.objects.filter(thermostat=thermostat_pk)
+
+    def perform_create(self, serializer):
+        # Grab thermostat from kwargs provided by the router
+        thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
+        # Add parent information to the serializer
+        serializer.save(thermostat=thermostat)
+
+    @list_route(methods=['get'], url_path='latest')
+    def latest(self, request, *args, **kwargs):
+        meta_entries = self.get_queryset().order_by('-datetime')
+        if len(meta_entries) == 0:
+            raise Http404('There are no meta entries.')
+        latest_temperature = meta_entries[0]
+        return Response(self.get_serializer(latest_temperature).data)
+
+    # TODO use a paginator
+    # @property
+    # def paginator(self):
+    #     """
+    #     The paginator instance associated with the view, or `None`.
+    #     """
+    #     # Override the paginator property to inject the kwargs to the paginator. This is required
+    #     # to generate the url for the latest entry.
+    #     if not hasattr(self, '_paginator'):
+    #         if self.pagination_class is None:
+    #             self._paginator = None
+    #         else:
+    #             # TODO rename Pagination
+    #             self._paginator = TemperaturePagination(kwargs=self.kwargs)
+    #     return self._paginator
 
 
 class HeatingTableEntryViewSet(viewsets.ModelViewSet):
