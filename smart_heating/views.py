@@ -2,9 +2,8 @@ from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
 from rest_framework import viewsets, renderers
 from rest_framework.decorators import list_route
-from rest_framework.response import Response
 
-from smart_heating.pagination import TemperaturePagination
+from smart_heating.pagination import *
 from smart_heating.serializers import *
 
 
@@ -161,21 +160,20 @@ class ThermostatMetaEntryViewSet(viewsets.ModelViewSet):
         latest_temperature = meta_entries[0]
         return Response(self.get_serializer(latest_temperature).data)
 
-    # TODO use a paginator
-    # @property
-    # def paginator(self):
-    #     """
-    #     The paginator instance associated with the view, or `None`.
-    #     """
-    #     # Override the paginator property to inject the kwargs to the paginator. This is required
-    #     # to generate the url for the latest entry.
-    #     if not hasattr(self, '_paginator'):
-    #         if self.pagination_class is None:
-    #             self._paginator = None
-    #         else:
-    #             # TODO rename Pagination
-    #             self._paginator = TemperaturePagination(kwargs=self.kwargs)
-    #     return self._paginator
+    @property
+    def paginator(self):
+        """
+        The paginator instance associated with the view, or `None`.
+        """
+        # Override the paginator property to inject the kwargs to the paginator. This is required
+        # to generate the url for the latest entry.
+        if not hasattr(self, '_paginator'):
+            if self.pagination_class is None:
+                self._paginator = None
+            else:
+                # TODO rename Pagination
+                self._paginator = ThermostatMetaEntriesPagination(kwargs=self.kwargs)
+        return self._paginator
 
 
 class HeatingTableEntryViewSet(viewsets.ModelViewSet):

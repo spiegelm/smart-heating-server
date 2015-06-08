@@ -18,15 +18,14 @@ class ViewThermostatMetaEntryTestCase(APITestCase):
 
     def test_meta_entries_collection_has_pagination(self):
 
-        self.skipTest('add pagination')
-
         result = self.client.get('/residence/3/room/1/thermostat/5/meta_entry/')
 
         self.assertEqual(result.status_code, status.HTTP_200_OK)
         self.assertEqual(result.data.get('count'), 0)
         self.assertEqual(result.data.get('next_url'), None)
         self.assertEqual(result.data.get('previous_url'), None)
-        # self.assertEqual(result.data.get('latest_temperature_url'), 'http://testserver/residence/3/room/1/thermostat/5/temperature/latest/')
+        self.assertEqual(result.data.get('latest_entry_url'),
+                         'http://testserver/residence/3/room/1/thermostat/5/meta_entry/latest/')
         self.assertEqual(result.data.get('results'), [])
 
     def test_meta_entries_collection_consists_of_representations(self):
@@ -42,10 +41,10 @@ class ViewThermostatMetaEntryTestCase(APITestCase):
         expected_results = [response_temp0.data, response_temp1.data]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertEqual(response.data.get('count'), 2)
-        # self.assertEqual(response.data.get('next_url'), None)
-        # self.assertEqual(response.data.get('results'), expected_results)
-        self.assertEqual(response.data, expected_results)
+        self.assertEqual(response.data.get('count'), 2)
+        self.assertEqual(response.data.get('previous_url'), None)
+        self.assertEqual(response.data.get('next_url'), None)
+        self.assertEqual(response.data.get('results'), expected_results)
 
     def test_reverse_url(self):
         date0 = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
