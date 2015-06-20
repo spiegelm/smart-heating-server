@@ -524,6 +524,11 @@ class HeatingTableTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_update_heating_table_entry(self):
+
+        # TODO
+        self.skipTest('not implemented')
+
     def test_heating_table_entries_ordered_by_date_and_time(self):
         time12 = datetime.datetime(2000, 1, 1, 12, 0, 0).time()
         time13 = datetime.datetime(2000, 1, 1, 13, 0, 0).time()

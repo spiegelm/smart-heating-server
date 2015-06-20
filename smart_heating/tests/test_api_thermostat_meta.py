@@ -54,3 +54,20 @@ class ViewThermostatMetaEntryTestCase(APITestCase):
         self.assertEqual(url, '/residence/3/room/1/thermostat/5/meta_entry/%s/' % meta0.pk)
 
     # TODO def test_meta_representation_contains_rssi_uptime_battery(self):
+
+    def test_create_meta_entry(self):
+        date0 = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        data = {'datetime': date0.isoformat(), 'rssi': 30}
+        response = self.client.post('/residence/3/room/1/thermostat/5/meta_entry/', data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_update_meta_entry(self):
+        date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        meta_entry = models.ThermostatMetaEntry.objects.create(thermostat=self.thermostat, datetime=date, rssi=-30)
+
+        data = {'rssi': -50, 'uptime': 500, 'battery': 5000}
+
+        response = self.client.put('/residence/3/room/1/thermostat/5/meta_entry/%s/' % meta_entry.pk, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
