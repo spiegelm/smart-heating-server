@@ -61,7 +61,7 @@ class SimpleThermostatSerializer(ThermostatSerializer):
 
 class HeatingTableEntrySerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='heatingtableentry-detail', read_only=True)
-    thermostat = SimpleThermostatSerializer()
+    thermostat = SimpleThermostatSerializer(read_only=True)
 
     class Meta:
         model = HeatingTableEntry
@@ -81,7 +81,7 @@ class TemperatureSerializer(serializers.HyperlinkedModelSerializer):
 class ThermostatMetaEntrySerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostatmetaentry-detail', read_only=True)
     # Use the simplified serializer for a smaller payload size
-    thermostat = SimpleThermostatSerializer()
+    thermostat = SimpleThermostatSerializer(read_only=True)
 
     class Meta:
         model = ThermostatMetaEntry
