@@ -1,0 +1,356 @@
+digraph model_graph {
+  // Dotfile by Django-Extensions graph_models
+  // Created: 2015-06-22 01:44
+  // Cli Options: smart_heating
+
+  fontname = "Helvetica"
+  fontsize = 8
+  splines  = true
+
+  node [
+    fontname = "Helvetica"
+    fontsize = 8
+    shape = "plaintext"
+  ]
+
+  edge [
+    fontname = "Helvetica"
+    fontsize = 8
+  ]
+
+  // Labels
+
+
+  smart_heating_models_Device [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    Device<BR/>&lt;<FONT FACE="Helvetica Italic">Model</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">mac</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  smart_heating_models_Model [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    Model
+    </FONT></TD></TR>
+  
+    </TABLE>
+    >]
+
+  smart_heating_models_Residence [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    Residence<BR/>&lt;<FONT FACE="Helvetica Italic">Model</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">rfid</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">CharField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  smart_heating_models_User [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    User<BR/>&lt;<FONT FACE="Helvetica Italic">Model</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">imei</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">residence</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (rfid)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  smart_heating_models_Room [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    Room<BR/>&lt;<FONT FACE="Helvetica Italic">Model</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">residence</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (rfid)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  smart_heating_models_Thermostat [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    Thermostat<BR/>&lt;<FONT FACE="Helvetica Italic">Model</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">rfid</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">room</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (id)</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  smart_heating_models_Temperature [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    Temperature<BR/>&lt;<FONT FACE="Helvetica Italic">Model</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">datetime</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">DateTimeField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">thermostat</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (rfid)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">value</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">FloatField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  smart_heating_models_ThermostatMetaEntry [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    ThermostatMetaEntry<BR/>&lt;<FONT FACE="Helvetica Italic">Model</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">thermostat</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (rfid)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">battery</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">IntegerField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">datetime</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">DateTimeField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">rssi</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">IntegerField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">uptime</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">IntegerField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  smart_heating_models_RaspberryDevice [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    RaspberryDevice<BR/>&lt;<FONT FACE="Helvetica Italic">Device</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ItalicBold">rfid</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ItalicBold">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Italic">mac</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  smart_heating_models_ThermostatDevice [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    ThermostatDevice<BR/>&lt;<FONT FACE="Helvetica Italic">Device</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ItalicBold">rfid</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ItalicBold">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Italic">mac</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  smart_heating_models_HeatingTableEntry [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    HeatingTableEntry<BR/>&lt;<FONT FACE="Helvetica Italic">Model</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">thermostat</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (rfid)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">day</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">temperature</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">FloatField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">time</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">TimeField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+
+
+
+  // Relations
+
+  smart_heating_models_Device -> smart_heating_models_Model
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  smart_heating_models_Residence -> smart_heating_models_Model
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  smart_heating_models_User -> smart_heating_models_Residence
+  [label="residence (users)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  smart_heating_models_User -> smart_heating_models_Model
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  smart_heating_models_Room -> smart_heating_models_Residence
+  [label="residence (rooms)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  smart_heating_models_Room -> smart_heating_models_Model
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  smart_heating_models_Thermostat -> smart_heating_models_Room
+  [label="room (thermostats)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  smart_heating_models_Thermostat -> smart_heating_models_Model
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  smart_heating_models_Temperature -> smart_heating_models_Thermostat
+  [label="thermostat (temperatures)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  smart_heating_models_Temperature -> smart_heating_models_Model
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  smart_heating_models_ThermostatMetaEntry -> smart_heating_models_Thermostat
+  [label="thermostat (meta_entries)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  smart_heating_models_ThermostatMetaEntry -> smart_heating_models_Model
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  smart_heating_models_RaspberryDevice -> smart_heating_models_Device
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  smart_heating_models_ThermostatDevice -> smart_heating_models_Device
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  smart_heating_models_HeatingTableEntry -> smart_heating_models_Thermostat
+  [label="thermostat (heating_table_entries)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  smart_heating_models_HeatingTableEntry -> smart_heating_models_Model
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+}
+
