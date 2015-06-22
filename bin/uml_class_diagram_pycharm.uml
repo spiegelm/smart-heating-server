@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DjangoModelDependency</ID>
+  <OriginalElement>#smart-heating-server</OriginalElement>
+  <nodes>
+    <node x="1.3068362480127007" y="305.2670906200318">models.ThermostatDevice</node>
+    <node x="301.0" y="305.0">models.Thermostat</node>
+    <node x="3.5421303656598297" y="2.081081081081038">models.RaspberryDevice</node>
+    <node x="446.25" y="0.0">models.Residence</node>
+    <node x="300.0" y="511.5">models.Temperature</node>
+    <node x="564.0" y="498.0">models.HeatingTableEntry</node>
+    <node x="326.0" y="139.0">models.Room</node>
+    <node x="538.0" y="139.0">models.User</node>
+    <node x="0.0" y="471.0">models.ThermostatMetaEntry</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="models.Room" target="models.Residence">
+      <point x="0.0" y="-58.0" />
+      <point x="422.0" y="114.0" />
+      <point x="486.0" y="114.0" />
+      <point x="-39.75" y="44.5" />
+    </edge>
+    <edge source="models.User" target="models.Residence">
+      <point x="0.0" y="-58.0" />
+      <point x="629.5" y="114.0" />
+      <point x="565.5" y="114.0" />
+      <point x="39.75" y="44.5" />
+    </edge>
+    <edge source="models.Thermostat" target="models.Room">
+      <point x="0.0" y="-58.0" />
+      <point x="0.0" y="58.0" />
+    </edge>
+    <edge source="models.ThermostatMetaEntry" target="models.Thermostat">
+      <point x="0.0" y="-98.5" />
+      <point x="140.0" y="446.0" />
+      <point x="341.3333333333333" y="446.0" />
+      <point x="-80.66666666666669" y="58.0" />
+    </edge>
+    <edge source="models.HeatingTableEntry" target="models.Thermostat">
+      <point x="0.0" y="-71.5" />
+      <point x="665.5" y="446.0" />
+      <point x="502.6666666666667" y="446.0" />
+      <point x="80.66666666666669" y="58.0" />
+    </edge>
+    <edge source="models.Temperature" target="models.Thermostat">
+      <point x="0.0" y="-58.0" />
+      <point x="0.0" y="58.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.7652068126520681" x="384.0206677265501" y="381.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+  </Categories>
+</Diagram>
+
