@@ -452,6 +452,32 @@ class ViewTemperatureTestCase(APITestCase):
         self.assertEqual(temperature.value, 25.3)
         self.assertEqual(temperature.thermostat, self.thermostat)
 
+    def test_create_temperature_allow_valid_value_range(self):
+        date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        temperature_data = {'datetime': date.isoformat(), 'value': 5}
+        response = self.client.post('/residence/3/room/1/thermostat/5/temperature/', temperature_data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        date = datetime.datetime(2015, 5, 13, 8, 0, 0, 0, timezone.get_current_timezone())
+        temperature_data = {'datetime': date.isoformat(), 'value': 30}
+        response = self.client.post('/residence/3/room/1/thermostat/5/temperature/', temperature_data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_temperature_deny_invalid_value_range(self):
+        date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        temperature_data = {'datetime': date.isoformat(), 'value': 4}
+        response = self.client.post('/residence/3/room/1/thermostat/5/temperature/', temperature_data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
+        temperature_data = {'datetime': date.isoformat(), 'value': 31}
+        response = self.client.post('/residence/3/room/1/thermostat/5/temperature/', temperature_data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_update_temperature(self):
         date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
         temperature = models.Temperature.objects.create(thermostat=self.thermostat, datetime=date, value=36.1)

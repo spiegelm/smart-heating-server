@@ -93,7 +93,7 @@ class Thermostat(Model):
 class Temperature(Model):
     # TODO test datetime validation
     datetime = models.DateTimeField(primary_key=True)
-    value = models.FloatField()
+    value = models.FloatField(validators=[validators.MinValueValidator(5), validators.MaxValueValidator(30)])
     thermostat = models.ForeignKey('Thermostat', related_name='temperatures')
 
     class Meta:
