@@ -1,10 +1,44 @@
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
-from rest_framework import viewsets, renderers
+from rest_framework import viewsets, renderers, mixins
 from rest_framework.decorators import list_route
 
 from smart_heating.pagination import *
 from smart_heating.serializers import *
+
+
+class HierarchicalModelHelper:
+    def get_room(self):
+        residence_pk = self.kwargs.get('residence_pk')
+        room_pk = self.kwargs.get('room_pk')
+        return get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
+
+    def get_thermostat(self):
+        room_pk = self.kwargs.get('room_pk')
+        thermostat_pk = self.kwargs.get('thermostat_pk')
+        return get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
+
+
+class ProtectedModelViewSet(mixins.CreateModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.UpdateModelMixin,
+                            mixins.DestroyModelMixin,
+                            mixins.ListModelMixin,
+                            viewsets.GenericViewSet,
+                            HierarchicalModelHelper):
+    """
+    A viewset that provides default `create()`, `retrieve()`,
+    `destroy()` and `list()` actions.
+    """
+    pass
+
+class ModelViewSet(viewsets.ModelViewSet,
+                   HierarchicalModelHelper):
+    """
+    A viewset that provides default `create()`, `retrieve()`, `update()`,
+    `partial_update()`, `destroy()` and `list()` actions.
+    """
+    pass
 
 
 class ResidenceViewSet(viewsets.ModelViewSet):
@@ -67,7 +101,7 @@ class ThermostatViewSet(viewsets.ModelViewSet):
         serializer.save(room=room)
 
 
-class TemperatureViewSet(viewsets.ModelViewSet):
+class TemperatureViewSet(ModelViewSet):
 
     queryset = Temperature.objects.all()
     serializer_class = TemperatureSerializer
@@ -81,17 +115,6 @@ class TemperatureViewSet(viewsets.ModelViewSet):
         self.get_thermostat()
         thermostat_pk = self.kwargs.get('thermostat_pk')
         return Temperature.objects.filter(thermostat=thermostat_pk)
-
-    def get_room(self):
-        residence_pk = self.kwargs.get('residence_pk')
-        room_pk = self.kwargs.get('room_pk')
-        return get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
-
-    def get_thermostat(self):
-        residence_pk = self.kwargs.get('residence_pk')
-        room_pk = self.kwargs.get('room_pk')
-        thermostat_pk = self.kwargs.get('thermostat_pk')
-        return get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
 
     def perform_create(self, serializer):
         # Grab thermostat from kwargs provided by the router
@@ -132,18 +155,16 @@ class TemperatureViewSet(viewsets.ModelViewSet):
                 self._paginator = TemperaturePagination(kwargs=self.kwargs)
         return self._paginator
 
-class ThermostatMetaEntryViewSet(viewsets.ModelViewSet):
+class ThermostatMetaEntryViewSet(ProtectedModelViewSet):
 
     queryset = ThermostatMetaEntry.objects.all()
     serializer_class = ThermostatMetaEntrySerializer
 
     def get_queryset(self):
         # check residence, room and thermostat in hierarchy
-        residence_pk = self.kwargs.get('residence_pk')
-        room_pk = self.kwargs.get('room_pk')
+        self.get_room()
+        self.get_thermostat()
         thermostat_pk = self.kwargs.get('thermostat_pk')
-        get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
-        get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
         return ThermostatMetaEntry.objects.filter(thermostat=thermostat_pk)
 
     def perform_create(self, serializer):
@@ -176,24 +197,22 @@ class ThermostatMetaEntryViewSet(viewsets.ModelViewSet):
         return self._paginator
 
 
-class HeatingTableEntryViewSet(viewsets.ModelViewSet):
+class HeatingTableEntryViewSet(ModelViewSet):
 
     queryset = HeatingTableEntry.objects.all()
     serializer_class = HeatingTableEntrySerializer
 
     def get_queryset(self):
-        residence_pk = self.kwargs.get('residence_pk')
-        room_pk = self.kwargs.get('room_pk')
-        thermostat_pk = self.kwargs.get('thermostat_pk')
         # check residence, room and thermostat in hierarchy
-        get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
-        get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
+        self.get_room()
+        self.get_thermostat()
+        thermostat_pk = self.kwargs.get('thermostat_pk')
         return HeatingTableEntry.objects.filter(thermostat=thermostat_pk)
 
     def perform_create(self, serializer):
         # Grab thermostat from kwargs provided by the router
         thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
-        # Add residence information to the serializer
+        # Add parent information to the serializer
         serializer.save(thermostat=thermostat)
 
 

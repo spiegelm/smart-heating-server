@@ -61,11 +61,11 @@ class SimpleThermostatSerializer(ThermostatSerializer):
 
 class HeatingTableEntrySerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='heatingtableentry-detail', read_only=True)
-    thermostat = SimpleThermostatSerializer()
 
     class Meta:
         model = HeatingTableEntry
-        fields = ('id', 'url', 'day', 'time', 'temperature', 'thermostat', )
+        fields = ('id', 'url', 'day', 'time', 'temperature')
+        extra_kwargs = {'thermostat': {}}
 
 
 class TemperatureSerializer(serializers.HyperlinkedModelSerializer):
@@ -80,12 +80,11 @@ class TemperatureSerializer(serializers.HyperlinkedModelSerializer):
 
 class ThermostatMetaEntrySerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostatmetaentry-detail', read_only=True)
-    # Use the simplified serializer for a smaller payload size
-    thermostat = SimpleThermostatSerializer()
 
     class Meta:
         model = ThermostatMetaEntry
-        fields = ('id', 'url', 'datetime', 'rssi', 'uptime', 'battery', 'thermostat')
+        fields = ('id', 'url', 'datetime', 'rssi', 'uptime', 'battery')
+        extra_kwargs = {'thermostat': {}}
 
 
 class ThermostatDeviceSerializer(serializers.HyperlinkedModelSerializer):
