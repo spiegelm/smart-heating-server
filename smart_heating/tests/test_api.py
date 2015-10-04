@@ -496,7 +496,7 @@ class ViewTemperatureTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class HeatingTableTestCase(APITestCase):
+class ViewHeatingTableTestCase(APITestCase):
 
     def setUp(self):
         self.residence = models.Residence.objects.create(rfid='3')
@@ -514,8 +514,6 @@ class HeatingTableTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data.get('day'), models.HeatingTableEntry.MONDAY)
         self.assertEqual(response.data.get('time'), '13:45:00')
-        self.assertEqual(response.data.get('thermostat').get('url'),
-                         'http://testserver/residence/3/room/1/thermostat/5/')
 
     def test_create_heating_table_entry(self):
 
@@ -526,21 +524,27 @@ class HeatingTableTestCase(APITestCase):
 
     def test_update_heating_table_entry(self):
 
-        # TODO
-        self.skipTest('not implemented')
+        time = datetime.datetime(2000, 1, 1, 13, 45, 0).time()
+        entry = models.HeatingTableEntry.objects.create(thermostat=self.thermostat,
+                                                        day=models.HeatingTableEntry.MONDAY, time=time, temperature=23.0)
+
+        data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 25.67}
+        response = self.client.put('/residence/3/room/1/thermostat/5/heating_table/%s/' % entry.pk, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_heating_table_entries_ordered_by_date_and_time(self):
         time12 = datetime.datetime(2000, 1, 1, 12, 0, 0).time()
         time13 = datetime.datetime(2000, 1, 1, 13, 0, 0).time()
-        entry_tue_13 = models.HeatingTableEntry.objects.create(\
+        entry_tue_13 = models.HeatingTableEntry.objects.create(
             thermostat=self.thermostat, day=models.HeatingTableEntry.TUESDAY, time=time13, temperature=23.0)
-        entry_tue_12 = models.HeatingTableEntry.objects.create(\
+        entry_tue_12 = models.HeatingTableEntry.objects.create(
             thermostat=self.thermostat, day=models.HeatingTableEntry.TUESDAY, time=time12, temperature=23.0)
-        entry_mon_12 = models.HeatingTableEntry.objects.create(\
+        entry_mon_12 = models.HeatingTableEntry.objects.create(
             thermostat=self.thermostat, day=models.HeatingTableEntry.MONDAY, time=time12, temperature=23.0)
-        entry_fri_13 = models.HeatingTableEntry.objects.create(\
+        entry_fri_13 = models.HeatingTableEntry.objects.create(
             thermostat=self.thermostat, day=models.HeatingTableEntry.FRIDAY, time=time13,temperature=23.0)
-        entry_mon_13 = models.HeatingTableEntry.objects.create(\
+        entry_mon_13 = models.HeatingTableEntry.objects.create(
             thermostat=self.thermostat, day=models.HeatingTableEntry.MONDAY, time=time13, temperature=23.0)
 
         response = self.client.get('/residence/3/room/1/thermostat/5/heating_table/')

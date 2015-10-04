@@ -60,9 +60,9 @@ class ViewThermostatMetaEntryTestCase(APITestCase):
         data = {'datetime': date0.isoformat(), 'rssi': 30}
         response = self.client.post('/residence/3/room/1/thermostat/5/meta_entry/', data)
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
-    def test_update_meta_entry(self):
+    def test_refuse_update_meta_entry(self):
         date = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
         meta_entry = models.ThermostatMetaEntry.objects.create(thermostat=self.thermostat, datetime=date, rssi=-30)
 
@@ -70,4 +70,4 @@ class ViewThermostatMetaEntryTestCase(APITestCase):
 
         response = self.client.put('/residence/3/room/1/thermostat/5/meta_entry/%s/' % meta_entry.pk, data)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
