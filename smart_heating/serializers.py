@@ -62,10 +62,11 @@ class SimpleThermostatSerializer(ThermostatSerializer):
 
 class HeatingTableEntrySerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='heatingtableentry-detail', read_only=True)
+    thermostat = SimpleThermostatSerializer(read_only=True)
 
     class Meta:
         model = HeatingTableEntry
-        fields = ('id', 'url', 'day', 'time', 'temperature')
+        fields = ('id', 'url', 'day', 'time', 'temperature', 'thermostat')
         validators = [UniqueTogetherValidator(queryset=model.objects.all(),
                                               fields=('day', 'time', 'thermostat'))]
         # validators = [UniqueTogetherValidator(queryset=model.objects.all(),

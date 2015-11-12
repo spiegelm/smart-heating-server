@@ -540,6 +540,8 @@ class ViewHeatingTableTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data.get('day'), models.HeatingTableEntry.MONDAY)
         self.assertEqual(response.data.get('time'), '13:45:00')
+        self.assertEqual(response.data.get('thermostat').get('url'),
+                         'http://testserver/residence/3/room/1/thermostat/5/')
 
     def test_create_heating_table_entry(self):
 
