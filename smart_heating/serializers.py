@@ -9,16 +9,12 @@ from smart_heating.models import *
 class HierarchicalSerializer(serializers.HyperlinkedModelSerializer):
     """
     Retrieves extra data from the context and includes it to the internal value,
-    as if it was included in the passed data for .create(), .update()
+    as if it was included in the passed data for .create(), .update(), etc.
     """
-
-    def __init__(self, instance=None, data=empty, **kwargs):
-        self.extra_data = kwargs.get('context').get('extra_data')
-        super().__init__(instance, data, **kwargs)
 
     def to_internal_value(self, data):
         ret = super().to_internal_value(data)
-        ret.update(self.extra_data)
+        ret.update(self.context.get('extra_data'))
         return ret
 
 
