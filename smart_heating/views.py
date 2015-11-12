@@ -18,6 +18,28 @@ class HierarchicalModelHelper:
         thermostat_pk = self.kwargs.get('thermostat_pk')
         return get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
 
+    @abstractmethod
+    def get_parent(self):
+        """
+        Returns a dictionary of {parent_name: parent_model_instance}.
+        """
+        pass
+
+    @abstractmethod
+    def check_hierarchy(self):
+        """
+        Checks if the URL arguments match the parents of the queried model.
+        """
+        pass
+
+    def get_queryset(self):
+        self.check_hierarchy()
+        return HeatingTableEntryViewSet.serializer_class.Meta.model.objects.filter(**self.get_parent())
+
+    def get_serializer_extra_data(self):
+        return self.get_parent()
+
+
 
 class ProtectedModelViewSet(mixins.CreateModelMixin,
                             mixins.RetrieveModelMixin,
@@ -32,13 +54,21 @@ class ProtectedModelViewSet(mixins.CreateModelMixin,
     """
     pass
 
-class ModelViewSet(viewsets.ModelViewSet,
+
+class HierarchicalModelViewSet(viewsets.ModelViewSet,
                    HierarchicalModelHelper):
     """
     A viewset that provides default `create()`, `retrieve()`, `update()`,
     `partial_update()`, `destroy()` and `list()` actions.
     """
-    pass
+
+    def get_serializer_context(self):
+        """
+        Extra context provided to the serializer class.
+        """
+        context = super().get_serializer_context()
+        context['extra_data'] = self.get_serializer_extra_data()
+        return context
 
 
 class ResidenceViewSet(viewsets.ModelViewSet):
@@ -101,7 +131,7 @@ class ThermostatViewSet(viewsets.ModelViewSet):
         serializer.save(room=room)
 
 
-class TemperatureViewSet(ModelViewSet):
+class TemperatureViewSet(HierarchicalModelViewSet):
 
     queryset = Temperature.objects.all()
     serializer_class = TemperatureSerializer
@@ -197,25 +227,18 @@ class ThermostatMetaEntryViewSet(ProtectedModelViewSet):
         return self._paginator
 
 
-class HeatingTableEntryViewSet(ModelViewSet):
+class HeatingTableEntryViewSet(HierarchicalModelViewSet):
 
     queryset = HeatingTableEntry.objects.all()
     serializer_class = HeatingTableEntrySerializer
 
-    def get_queryset(self):
-        # check residence, room and thermostat in hierarchy
-        self.get_room()
-        self.get_thermostat()
-        thermostat_pk = self.kwargs.get('thermostat_pk')
-        return HeatingTableEntry.objects.filter(thermostat=thermostat_pk)
+    def get_parent(self):
+        return {'thermostat': self.get_thermostat()}
 
-    def get_serializer_context(self):
-        """
-        Extra context provided to the serializer class.
-        """
-        context = super().get_serializer_context()
-        context['extra_data'] = {'thermostat': self.get_thermostat()}
-        return context
+    def check_hierarchy(self):
+        # Check residence, room and thermostat in hierarchy
+        self.get_room()         # This includes the residence check
+        self.get_thermostat()
 
 
 class DeviceLookupMixin(viewsets.ModelViewSet):
