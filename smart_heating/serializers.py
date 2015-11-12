@@ -1,5 +1,6 @@
-from django.forms import widgets
 from rest_framework import serializers
+from rest_framework.fields import empty
+from rest_framework.validators import UniqueTogetherValidator
 from smart_heating import relations
 from smart_heating.models import *
 
@@ -65,7 +66,21 @@ class HeatingTableEntrySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = HeatingTableEntry
         fields = ('id', 'url', 'day', 'time', 'temperature')
-        extra_kwargs = {'thermostat': {}}
+        validators = [UniqueTogetherValidator(queryset=model.objects.all(),
+                                              fields=('day', 'time', 'thermostat'))]
+        # validators = [UniqueTogetherValidator(queryset=model.objects.all(),
+        #                                       fields=model._meta.unique_together)]
+
+    def __init__(self, instance=None, data=empty, **kwargs):
+        if data is not empty:
+            self.thermostat = kwargs.get('context').get('thermostat')
+        super().__init__(instance, data, **kwargs)
+
+    def to_internal_value(self, data):
+        ret = super().to_internal_value(data)
+        if hasattr(self, 'thermostat'):
+            ret['thermostat'] = self.thermostat
+        return ret
 
 
 class TemperatureSerializer(serializers.HyperlinkedModelSerializer):

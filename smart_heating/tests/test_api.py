@@ -548,6 +548,33 @@ class ViewHeatingTableTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_create_heating_table_entry_duplicate(self):
+
+        data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 25.67}
+        response = self.client.post('/residence/3/room/1/thermostat/5/heating_table/', data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 25.67}
+        response = self.client.post('/residence/3/room/1/thermostat/5/heating_table/', data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data.get('non_field_errors'), ['The fields day, time, thermostat must make a unique set.'])
+
+    def test_create_heating_table_entry_duplicate_date_time_in_separate_thermostat(self):
+
+        second_thermostat = models.Thermostat.objects.create(room=self.room, rfid='5b')
+
+        data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 25.67}
+        response = self.client.post('/residence/3/room/1/thermostat/5/heating_table/', data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 25.67}
+        response = self.client.post('/residence/3/room/1/thermostat/%s/heating_table/' % second_thermostat.pk, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_update_heating_table_entry(self):
 
         time = datetime.datetime(2000, 1, 1, 13, 45, 0).time()

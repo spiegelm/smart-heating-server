@@ -209,11 +209,13 @@ class HeatingTableEntryViewSet(ModelViewSet):
         thermostat_pk = self.kwargs.get('thermostat_pk')
         return HeatingTableEntry.objects.filter(thermostat=thermostat_pk)
 
-    def perform_create(self, serializer):
-        # Grab thermostat from kwargs provided by the router
-        thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
-        # Add parent information to the serializer
-        serializer.save(thermostat=thermostat)
+    def get_serializer_context(self):
+        """
+        Extra context provided to the serializer class.
+        """
+        context = super().get_serializer_context()
+        context['thermostat'] = self.get_thermostat()
+        return context
 
 
 class DeviceLookupMixin(viewsets.ModelViewSet):
