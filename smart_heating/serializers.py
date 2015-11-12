@@ -74,13 +74,13 @@ class HeatingTableEntrySerializer(serializers.HyperlinkedModelSerializer):
 
     def __init__(self, instance=None, data=empty, **kwargs):
         if data is not empty:
-            self.thermostat = kwargs.get('context').get('thermostat')
+            self.extra_data = kwargs.get('context').get('extra_data')
         super().__init__(instance, data, **kwargs)
 
     def to_internal_value(self, data):
         ret = super().to_internal_value(data)
-        if hasattr(self, 'thermostat'):
-            ret['thermostat'] = self.thermostat
+        if hasattr(self, 'extra_data'):
+            ret.update(self.extra_data)
         return ret
 
 

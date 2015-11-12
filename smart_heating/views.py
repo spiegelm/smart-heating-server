@@ -214,7 +214,7 @@ class HeatingTableEntryViewSet(ModelViewSet):
         Extra context provided to the serializer class.
         """
         context = super().get_serializer_context()
-        context['thermostat'] = self.get_thermostat()
+        context['extra_data'] = {'thermostat': self.get_thermostat()}
         return context
 
 
