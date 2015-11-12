@@ -5,6 +5,23 @@ from smart_heating import relations
 from smart_heating.models import *
 
 
+
+class HierarchicalSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Retrieves extra data from the context and includes it to the internal value,
+    as if it was included in the passed data for .create(), .update()
+    """
+
+    def __init__(self, instance=None, data=empty, **kwargs):
+        self.extra_data = kwargs.get('context').get('extra_data')
+        super().__init__(instance, data, **kwargs)
+
+    def to_internal_value(self, data):
+        ret = super().to_internal_value(data)
+        ret.update(self.extra_data)
+        return ret
+
+
 class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
     rooms_url = serializers.HyperlinkedIdentityField(view_name='room-list', lookup_url_kwarg='residence_pk')
     users_url = serializers.HyperlinkedIdentityField(view_name='user-list', lookup_url_kwarg='residence_pk')
@@ -14,7 +31,8 @@ class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('rfid', 'url', 'rooms_url', 'users_url')
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(HierarchicalSerializer):
+
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='user-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
 
@@ -60,7 +78,7 @@ class SimpleThermostatSerializer(ThermostatSerializer):
         fields = ('url',)
 
 
-class HeatingTableEntrySerializer(serializers.HyperlinkedModelSerializer):
+class HeatingTableEntrySerializer(HierarchicalSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='heatingtableentry-detail', read_only=True)
     thermostat = SimpleThermostatSerializer(read_only=True)
 
@@ -71,17 +89,6 @@ class HeatingTableEntrySerializer(serializers.HyperlinkedModelSerializer):
                                               fields=('day', 'time', 'thermostat'))]
         # validators = [UniqueTogetherValidator(queryset=model.objects.all(),
         #                                       fields=model._meta.unique_together)]
-
-    def __init__(self, instance=None, data=empty, **kwargs):
-        if data is not empty:
-            self.extra_data = kwargs.get('context').get('extra_data')
-        super().__init__(instance, data, **kwargs)
-
-    def to_internal_value(self, data):
-        ret = super().to_internal_value(data)
-        if hasattr(self, 'extra_data'):
-            ret.update(self.extra_data)
-        return ret
 
 
 class TemperatureSerializer(serializers.HyperlinkedModelSerializer):

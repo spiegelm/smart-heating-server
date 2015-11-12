@@ -34,7 +34,7 @@ class HierarchicalModelHelper:
 
     def get_queryset(self):
         self.check_hierarchy()
-        return HeatingTableEntryViewSet.serializer_class.Meta.model.objects.filter(**self.get_parent())
+        return self.queryset.filter(**self.get_parent())
 
     def get_serializer_extra_data(self):
         return self.get_parent()
@@ -55,8 +55,8 @@ class ProtectedModelViewSet(mixins.CreateModelMixin,
     pass
 
 
-class HierarchicalModelViewSet(viewsets.ModelViewSet,
-                   HierarchicalModelHelper):
+class HierarchicalModelViewSet(HierarchicalModelHelper,
+                               viewsets.ModelViewSet):
     """
     A viewset that provides default `create()`, `retrieve()`, `update()`,
     `partial_update()`, `destroy()` and `list()` actions.
@@ -79,21 +79,16 @@ class ResidenceViewSet(viewsets.ModelViewSet):
     serializer_class = ResidenceSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(HierarchicalModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    def get_queryset(self):
-        residence_pk = self.kwargs['residence_pk']
-        get_object_or_404(Residence.objects.all(), pk=residence_pk)
-        return User.objects.filter(residence=residence_pk)
+    def get_residence(self):
+        return get_object_or_404(Residence.objects.all(), pk=self.kwargs['residence_pk'])
 
-    def perform_create(self, serializer):
-        # Grab residence from kwargs provided by the router
-        residence = Residence.objects.get(pk=self.kwargs.get('residence_pk'))
-        # Add residence information to the serializer
-        serializer.save(residence=residence)
+    def get_parent(self):
+        return {'residence': self.get_residence()}
 
 
 class RoomViewSet(viewsets.ModelViewSet):
