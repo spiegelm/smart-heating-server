@@ -101,22 +101,13 @@ class RoomViewSet(HierarchicalModelViewSet):
         return {'residence': self.get_residence()}
 
 
-class ThermostatViewSet(viewsets.ModelViewSet):
+class ThermostatViewSet(HierarchicalModelViewSet):
 
     queryset = Thermostat.objects.all()
     serializer_class = ThermostatSerializer
 
-    def get_queryset(self):
-        residence_pk = self.kwargs.get('residence_pk')
-        room_pk = self.kwargs.get('room_pk')
-        get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
-        return Thermostat.objects.filter(room=room_pk)
-
-    def perform_create(self, serializer):
-        # Grab room from kwargs provided by the router
-        room = Room.objects.get(pk=self.kwargs.get('room_pk'))
-        # Add residence information to the serializer
-        serializer.save(room=room)
+    def get_parent(self):
+        return {'room': self.get_room()}
 
 
 class TemperatureViewSet(HierarchicalModelViewSet):

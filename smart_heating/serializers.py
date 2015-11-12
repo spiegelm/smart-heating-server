@@ -48,7 +48,7 @@ class RoomSerializer(HierarchicalSerializer):
         fields = ('id', 'url', 'name', 'residence', 'thermostats_url')
 
 
-class ThermostatSerializer(serializers.HyperlinkedModelSerializer):
+class ThermostatSerializer(HierarchicalSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostat-detail', read_only=True)
     room = RoomSerializer(read_only=True)
     temperatures_url = relations.HierarchicalHyperlinkedIdentityField(source='temperatures',
