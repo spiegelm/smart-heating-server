@@ -8,6 +8,10 @@ from smart_heating.serializers import *
 
 
 class HierarchicalModelHelper:
+
+    def get_residence(self):
+        return get_object_or_404(Residence.objects.all(), pk=self.kwargs['residence_pk'])
+
     def get_room(self):
         residence_pk = self.kwargs.get('residence_pk')
         room_pk = self.kwargs.get('room_pk')
@@ -84,28 +88,17 @@ class UserViewSet(HierarchicalModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    def get_residence(self):
-        return get_object_or_404(Residence.objects.all(), pk=self.kwargs['residence_pk'])
-
     def get_parent(self):
         return {'residence': self.get_residence()}
 
 
-class RoomViewSet(viewsets.ModelViewSet):
+class RoomViewSet(HierarchicalModelViewSet):
 
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
-    def get_queryset(self):
-        residence_pk = self.kwargs.get('residence_pk')
-        get_object_or_404(Residence.objects.all(), pk=residence_pk)
-        return Room.objects.filter(residence=residence_pk)
-
-    def perform_create(self, serializer):
-        # Grab residence from kwargs provided by the router
-        residence = Residence.objects.get(pk=self.kwargs.get('residence_pk'))
-        # Add residence information to the serializer
-        serializer.save(residence=residence)
+    def get_parent(self):
+        return {'residence': self.get_residence()}
 
 
 class ThermostatViewSet(viewsets.ModelViewSet):

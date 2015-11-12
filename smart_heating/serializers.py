@@ -37,7 +37,7 @@ class UserSerializer(HierarchicalSerializer):
         fields = ('imei', 'url', 'name', 'residence')
 
 
-class RoomSerializer(serializers.HyperlinkedModelSerializer):
+class RoomSerializer(HierarchicalSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='room-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
     thermostats_url = relations.HierarchicalHyperlinkedIdentityField(source='thermostats', view_name='thermostat-list',
