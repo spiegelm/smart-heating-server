@@ -184,7 +184,6 @@ class ThermostatMetaEntryViewSet(HierarchicalModelViewSet):
             if self.pagination_class is None:
                 self._paginator = None
             else:
-                # TODO rename Pagination
                 self._paginator = ThermostatMetaEntriesPagination(kwargs=self.kwargs)
         return self._paginator
 
