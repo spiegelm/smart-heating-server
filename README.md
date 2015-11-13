@@ -16,22 +16,34 @@ There are two different API responses for successful GET requests: *resource col
 
 Setup a virtual or dedicated server based on Ubuntu Linux 14.04 LTS and enter the following the commands in a terminal:
 
-```
+```bash
+# Install dependencies
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install python-virtualenv
-sudo apt-get install git
+sudo apt-get install git python-virtualenv python3-pip
+# Install code into home directory
 cd ~
-git clone https://github.com/spiegelm/smart-heating
-cd smart-heating/
-git checkout server
-cd ~
+git clone https://github.com/spiegelm/smart-heating-server
+# Setup virtualenv
 virtualenv -p python3 env
-sudo apt-get install python3-pip
-source env/bin/activate
+. ~/env/bin/activate
+# Check for python version >=3.4.0
 python --version
-cd smart-heating/server/
+# Install requirements, setup database and start server
+cd ~/smart-heating-server/
 pip install -r requirements.txt
-python manage.py migrate
-python ./manage.py runserver 0.0.0.0:8000 # run server on port 8000
+./manage.py migrate
+# Run server on port 8000
+./manage.py runserver 0.0.0.0:8000
+# Test that server is accessible via browser
+# Kill server: CTRL-C
+# Start server in the background using nohup
+./scripts/restart_server.sh
+# Kill background server
+./scripts/kill_server.sh
+
+# To get the newest code from the repository:
+cd ~/smart-heating-server
+git pull
+./scripts/restart_server.sh
 ```
