@@ -1,6 +1,6 @@
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
-from rest_framework import viewsets, renderers, mixins
+from rest_framework import viewsets, renderers, mixins, status
 from rest_framework.decorators import list_route
 
 from smart_heating.pagination import *
@@ -8,6 +8,10 @@ from smart_heating.serializers import *
 
 
 class HierarchicalModelHelper:
+
+    def get_residence(self):
+        return get_object_or_404(Residence.objects.all(), pk=self.kwargs['residence_pk'])
+
     def get_room(self):
         residence_pk = self.kwargs.get('residence_pk')
         room_pk = self.kwargs.get('room_pk')
@@ -17,6 +21,28 @@ class HierarchicalModelHelper:
         room_pk = self.kwargs.get('room_pk')
         thermostat_pk = self.kwargs.get('thermostat_pk')
         return get_object_or_404(Thermostat.objects.all(), room=room_pk, pk=thermostat_pk)
+
+    @abstractmethod
+    def get_parent(self):
+        """
+        Returns a dictionary of {parent_name: parent_model_instance}.
+        """
+        pass
+
+    @abstractmethod
+    def check_hierarchy(self):
+        """
+        Checks if the URL arguments match the parents of the queried model.
+        """
+        pass
+
+    def get_queryset(self):
+        self.check_hierarchy()
+        return self.queryset.filter(**self.get_parent())
+
+    def get_serializer_extra_data(self):
+        return self.get_parent()
+
 
 
 class ProtectedModelViewSet(mixins.CreateModelMixin,
@@ -32,13 +58,21 @@ class ProtectedModelViewSet(mixins.CreateModelMixin,
     """
     pass
 
-class ModelViewSet(viewsets.ModelViewSet,
-                   HierarchicalModelHelper):
+
+class HierarchicalModelViewSet(HierarchicalModelHelper,
+                               viewsets.ModelViewSet):
     """
     A viewset that provides default `create()`, `retrieve()`, `update()`,
     `partial_update()`, `destroy()` and `list()` actions.
     """
-    pass
+
+    def get_serializer_context(self):
+        """
+        Extra context provided to the serializer class.
+        """
+        context = super().get_serializer_context()
+        context['extra_data'] = self.get_serializer_extra_data()
+        return context
 
 
 class ResidenceViewSet(viewsets.ModelViewSet):
@@ -49,78 +83,46 @@ class ResidenceViewSet(viewsets.ModelViewSet):
     serializer_class = ResidenceSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(HierarchicalModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    def get_queryset(self):
-        residence_pk = self.kwargs['residence_pk']
-        get_object_or_404(Residence.objects.all(), pk=residence_pk)
-        return User.objects.filter(residence=residence_pk)
-
-    def perform_create(self, serializer):
-        # Grab residence from kwargs provided by the router
-        residence = Residence.objects.get(pk=self.kwargs.get('residence_pk'))
-        # Add residence information to the serializer
-        serializer.save(residence=residence)
+    def get_parent(self):
+        return {'residence': self.get_residence()}
 
 
-class RoomViewSet(viewsets.ModelViewSet):
+class RoomViewSet(HierarchicalModelViewSet):
 
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
-    def get_queryset(self):
-        residence_pk = self.kwargs.get('residence_pk')
-        get_object_or_404(Residence.objects.all(), pk=residence_pk)
-        return Room.objects.filter(residence=residence_pk)
-
-    def perform_create(self, serializer):
-        # Grab residence from kwargs provided by the router
-        residence = Residence.objects.get(pk=self.kwargs.get('residence_pk'))
-        # Add residence information to the serializer
-        serializer.save(residence=residence)
+    def get_parent(self):
+        return {'residence': self.get_residence()}
 
 
-class ThermostatViewSet(viewsets.ModelViewSet):
+class ThermostatViewSet(HierarchicalModelViewSet):
 
     queryset = Thermostat.objects.all()
     serializer_class = ThermostatSerializer
 
-    def get_queryset(self):
-        residence_pk = self.kwargs.get('residence_pk')
-        room_pk = self.kwargs.get('room_pk')
-        get_object_or_404(Room.objects.all(), residence=residence_pk, pk=room_pk)
-        return Thermostat.objects.filter(room=room_pk)
-
-    def perform_create(self, serializer):
-        # Grab room from kwargs provided by the router
-        room = Room.objects.get(pk=self.kwargs.get('room_pk'))
-        # Add residence information to the serializer
-        serializer.save(room=room)
+    def get_parent(self):
+        return {'room': self.get_room()}
 
 
-class TemperatureViewSet(ModelViewSet):
+class TemperatureViewSet(HierarchicalModelViewSet):
 
     queryset = Temperature.objects.all()
     serializer_class = TemperatureSerializer
 
-    # Allow dots in the lookup value as the datetime primary key uses a dot to represent milliseconds
+    # Allow dots in the lookup value. The datetime primary key uses a dot to represent milliseconds
     lookup_value_regex = '[^/]+'
 
-    def get_queryset(self):
-        # check residence, room and thermostat in hierarchy
-        self.get_room()
-        self.get_thermostat()
-        thermostat_pk = self.kwargs.get('thermostat_pk')
-        return Temperature.objects.filter(thermostat=thermostat_pk)
+    def get_parent(self):
+        return {'thermostat': self.get_thermostat()}
 
-    def perform_create(self, serializer):
-        # Grab thermostat from kwargs provided by the router
-        thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
-        # Add parent information to the serializer
-        serializer.save(thermostat=thermostat)
+    def check_hierarchy(self):
+        self.get_room()
 
     @list_route(methods=['get'], url_path='latest')
     def latest(self, request, *args, **kwargs):
@@ -155,23 +157,13 @@ class TemperatureViewSet(ModelViewSet):
                 self._paginator = TemperaturePagination(kwargs=self.kwargs)
         return self._paginator
 
-class ThermostatMetaEntryViewSet(ProtectedModelViewSet):
+class ThermostatMetaEntryViewSet(HierarchicalModelViewSet):
 
     queryset = ThermostatMetaEntry.objects.all()
     serializer_class = ThermostatMetaEntrySerializer
 
-    def get_queryset(self):
-        # check residence, room and thermostat in hierarchy
-        self.get_room()
-        self.get_thermostat()
-        thermostat_pk = self.kwargs.get('thermostat_pk')
-        return ThermostatMetaEntry.objects.filter(thermostat=thermostat_pk)
-
-    def perform_create(self, serializer):
-        # Grab thermostat from kwargs provided by the router
-        thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
-        # Add parent information to the serializer
-        serializer.save(thermostat=thermostat)
+    def get_parent(self):
+        return {'thermostat': self.get_thermostat()}
 
     @list_route(methods=['get'], url_path='latest')
     def latest(self, request, *args, **kwargs):
@@ -192,30 +184,22 @@ class ThermostatMetaEntryViewSet(ProtectedModelViewSet):
             if self.pagination_class is None:
                 self._paginator = None
             else:
-                # TODO rename Pagination
                 self._paginator = ThermostatMetaEntriesPagination(kwargs=self.kwargs)
         return self._paginator
 
 
-class HeatingTableEntryViewSet(ModelViewSet):
+class HeatingTableEntryViewSet(HierarchicalModelViewSet):
 
     queryset = HeatingTableEntry.objects.all()
     serializer_class = HeatingTableEntrySerializer
 
-    def get_queryset(self):
-        # check residence, room and thermostat in hierarchy
-        self.get_room()
-        self.get_thermostat()
-        thermostat_pk = self.kwargs.get('thermostat_pk')
-        return HeatingTableEntry.objects.filter(thermostat=thermostat_pk)
+    def get_parent(self):
+        return {'thermostat': self.get_thermostat()}
 
-    def get_serializer_context(self):
-        """
-        Extra context provided to the serializer class.
-        """
-        context = super().get_serializer_context()
-        context['thermostat'] = self.get_thermostat()
-        return context
+    def check_hierarchy(self):
+        # Check residence, room and thermostat in hierarchy
+        self.get_room()         # This includes the residence check
+        self.get_thermostat()
 
 
 class DeviceLookupMixin(viewsets.ModelViewSet):

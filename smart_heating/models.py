@@ -72,9 +72,6 @@ class Room(Model):
         return pks
 
 
-# TODO model the heating table
-# class HeatingTable(models.Model):
-
 
 class Thermostat(Model):
     rfid = models.CharField(primary_key=True, max_length=100, validators=[rfid_validator])

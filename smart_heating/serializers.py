@@ -5,6 +5,19 @@ from smart_heating import relations
 from smart_heating.models import *
 
 
+
+class HierarchicalSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Retrieves extra data from the context and includes it to the internal value,
+    as if it was included in the passed data for .create(), .update(), etc.
+    """
+
+    def to_internal_value(self, data):
+        ret = super().to_internal_value(data)
+        ret.update(self.context.get('extra_data'))
+        return ret
+
+
 class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
     rooms_url = serializers.HyperlinkedIdentityField(view_name='room-list', lookup_url_kwarg='residence_pk')
     users_url = serializers.HyperlinkedIdentityField(view_name='user-list', lookup_url_kwarg='residence_pk')
@@ -14,7 +27,8 @@ class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('rfid', 'url', 'rooms_url', 'users_url')
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(HierarchicalSerializer):
+
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='user-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
 
@@ -23,7 +37,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('imei', 'url', 'name', 'residence')
 
 
-class RoomSerializer(serializers.HyperlinkedModelSerializer):
+class RoomSerializer(HierarchicalSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='room-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
     thermostats_url = relations.HierarchicalHyperlinkedIdentityField(source='thermostats', view_name='thermostat-list',
@@ -34,7 +48,7 @@ class RoomSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url', 'name', 'residence', 'thermostats_url')
 
 
-class ThermostatSerializer(serializers.HyperlinkedModelSerializer):
+class ThermostatSerializer(HierarchicalSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostat-detail', read_only=True)
     room = RoomSerializer(read_only=True)
     temperatures_url = relations.HierarchicalHyperlinkedIdentityField(source='temperatures',
@@ -60,7 +74,7 @@ class SimpleThermostatSerializer(ThermostatSerializer):
         fields = ('url',)
 
 
-class HeatingTableEntrySerializer(serializers.HyperlinkedModelSerializer):
+class HeatingTableEntrySerializer(HierarchicalSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='heatingtableentry-detail', read_only=True)
     thermostat = SimpleThermostatSerializer(read_only=True)
 
@@ -72,19 +86,8 @@ class HeatingTableEntrySerializer(serializers.HyperlinkedModelSerializer):
         # validators = [UniqueTogetherValidator(queryset=model.objects.all(),
         #                                       fields=model._meta.unique_together)]
 
-    def __init__(self, instance=None, data=empty, **kwargs):
-        if data is not empty:
-            self.thermostat = kwargs.get('context').get('thermostat')
-        super().__init__(instance, data, **kwargs)
 
-    def to_internal_value(self, data):
-        ret = super().to_internal_value(data)
-        if hasattr(self, 'thermostat'):
-            ret['thermostat'] = self.thermostat
-        return ret
-
-
-class TemperatureSerializer(serializers.HyperlinkedModelSerializer):
+class TemperatureSerializer(HierarchicalSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='temperature-detail', read_only=True)
     # Use the simplified serializer for a smaller payload size
     thermostat = SimpleThermostatSerializer(read_only=True)
@@ -94,7 +97,7 @@ class TemperatureSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('datetime', 'url', 'value', 'thermostat')
 
 
-class ThermostatMetaEntrySerializer(serializers.HyperlinkedModelSerializer):
+class ThermostatMetaEntrySerializer(HierarchicalSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostatmetaentry-detail', read_only=True)
 
     class Meta:
