@@ -1,6 +1,6 @@
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
-from rest_framework import viewsets, renderers, mixins
+from rest_framework import viewsets, renderers, mixins, status
 from rest_framework.decorators import list_route
 
 from smart_heating.pagination import *
@@ -157,23 +157,13 @@ class TemperatureViewSet(HierarchicalModelViewSet):
                 self._paginator = TemperaturePagination(kwargs=self.kwargs)
         return self._paginator
 
-class ThermostatMetaEntryViewSet(ProtectedModelViewSet):
+class ThermostatMetaEntryViewSet(HierarchicalModelViewSet):
 
     queryset = ThermostatMetaEntry.objects.all()
     serializer_class = ThermostatMetaEntrySerializer
 
-    def get_queryset(self):
-        # check residence, room and thermostat in hierarchy
-        self.get_room()
-        self.get_thermostat()
-        thermostat_pk = self.kwargs.get('thermostat_pk')
-        return ThermostatMetaEntry.objects.filter(thermostat=thermostat_pk)
-
-    def perform_create(self, serializer):
-        # Grab thermostat from kwargs provided by the router
-        thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
-        # Add parent information to the serializer
-        serializer.save(thermostat=thermostat)
+    def get_parent(self):
+        return {'thermostat': self.get_thermostat()}
 
     @list_route(methods=['get'], url_path='latest')
     def latest(self, request, *args, **kwargs):

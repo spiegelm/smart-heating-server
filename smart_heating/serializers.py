@@ -97,7 +97,7 @@ class TemperatureSerializer(HierarchicalSerializer):
         fields = ('datetime', 'url', 'value', 'thermostat')
 
 
-class ThermostatMetaEntrySerializer(serializers.HyperlinkedModelSerializer):
+class ThermostatMetaEntrySerializer(HierarchicalSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostatmetaentry-detail', read_only=True)
 
     class Meta:
