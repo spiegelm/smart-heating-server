@@ -115,21 +115,14 @@ class TemperatureViewSet(HierarchicalModelViewSet):
     queryset = Temperature.objects.all()
     serializer_class = TemperatureSerializer
 
-    # Allow dots in the lookup value as the datetime primary key uses a dot to represent milliseconds
+    # Allow dots in the lookup value. The datetime primary key uses a dot to represent milliseconds
     lookup_value_regex = '[^/]+'
 
-    def get_queryset(self):
-        # check residence, room and thermostat in hierarchy
-        self.get_room()
-        self.get_thermostat()
-        thermostat_pk = self.kwargs.get('thermostat_pk')
-        return Temperature.objects.filter(thermostat=thermostat_pk)
+    def get_parent(self):
+        return {'thermostat': self.get_thermostat()}
 
-    def perform_create(self, serializer):
-        # Grab thermostat from kwargs provided by the router
-        thermostat = Thermostat.objects.get(pk=self.kwargs.get('thermostat_pk'))
-        # Add parent information to the serializer
-        serializer.save(thermostat=thermostat)
+    def check_hierarchy(self):
+        self.get_room()
 
     @list_route(methods=['get'], url_path='latest')
     def latest(self, request, *args, **kwargs):
