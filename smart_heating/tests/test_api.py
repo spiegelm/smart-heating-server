@@ -9,6 +9,7 @@ import datetime
 class ViewRootTestCase(APITestCase):
 
     def test_root_contains_residence_url(self):
+        """Root contains residence url"""
         response = self.client.get('/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -18,12 +19,14 @@ class ViewRootTestCase(APITestCase):
 class ViewResidenceTestCase(APITestCase):
 
     def test_list_residences_empty(self):
+        """Request to empty residence collection returns empty list"""
         response = self.client.get('/residence/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
     def test_list_single_residence(self):
+        """Request to collection with one residence returns list with this residence"""
         residence = models.Residence.objects.create(rfid='3')
         response = self.client.get('/residence/')
 
@@ -34,7 +37,8 @@ class ViewResidenceTestCase(APITestCase):
         self.assertEqual(response.data[0].get('rooms_url'), 'http://testserver/residence/3/room/')
         self.assertEqual(response.data[0].get('users_url'), 'http://testserver/residence/3/user/')
 
-    def test_get_residence_without_rooms(self):
+    def test_residence_representation_without_rooms(self):
+        """Residence representation contains RFID, url, rooms_url, users_url"""
         residence = models.Residence.objects.create(rfid='3')
         response = self.client.get('/residence/3/')
 
@@ -44,24 +48,24 @@ class ViewResidenceTestCase(APITestCase):
         self.assertEqual(response.data.get('rooms_url'), 'http://testserver/residence/3/room/')
         self.assertEqual(response.data.get('users_url'), 'http://testserver/residence/3/user/')
 
-    def test_get_residence_with_rooms(self):
+    def test_collection_consists_of_representations(self):
+        """Residence collection consists of residence representations"""
         residence = models.Residence.objects.create(rfid='3')
-        room1 = models.Room.objects.create(residence=residence)
-        room2 = models.Room.objects.create(residence=residence)
-        response = self.client.get('/residence/3/')
+        response = self.client.get('/residence/')
+        response1 = self.client.get('/residence/3/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data.get('rfid'), '3', 'RFID')
-        self.assertEqual(response.data.get('url'), 'http://testserver/residence/3/')
-        self.assertEqual(response.data.get('rooms_url'), 'http://testserver/residence/3/room/')
-        self.assertEqual(response.data.get('users_url'), 'http://testserver/residence/3/user/')
+        self.assertEqual(response1.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [response1.data])
 
     def test_get_residence_404(self):
+        """Request with invalid RFID results in HTTP 404"""
         response = self.client.get('/residence/3/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_residence(self):
+        """Can create a residence"""
         response = self.client.post('/residence/', {'rfid': '3'})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -71,6 +75,7 @@ class ViewResidenceTestCase(APITestCase):
         self.assertEqual(residence.rfid, '3')
 
     def test_update_residence(self):
+        """Can update a residence"""
         residence = models.Residence.objects.create(rfid='3')
 
         response = self.client.put('/residence/3/', {'rfid': '42'})
@@ -81,6 +86,7 @@ class ViewResidenceTestCase(APITestCase):
         self.assertEqual(residence.rfid, '42')
 
     def test_destroy_residence(self):
+        """Can delete a residence"""
         residence = models.Residence.objects.create(rfid='3')
         self.assertEqual(residence.rfid, '3')
 
@@ -100,17 +106,20 @@ class ViewUserTestCase(APITestCase):
         self.residence = models.Residence.objects.create(rfid='3')
 
     def test_list_users_empty(self):
+        """Request to empty user collection returns empty list"""
         response = self.client.get('/residence/3/user/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
     def test_list_users_of_non_existent_residence(self):
+        """Request to user collection of non existent residence results in HTTP 404"""
         response = self.client.get('/residence/not-a-residence/user/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_user_collection_contains_user_representations(self):
+        """User collection consists of user representations"""
         user0 = models.User.objects.create(residence=self.residence, imei='123', name='Le Me')
         user1 = models.User.objects.create(residence=self.residence, imei='456', name='El user')
 
@@ -124,6 +133,7 @@ class ViewUserTestCase(APITestCase):
         self.assertEqual(response.data[1], response_user1.data)
 
     def test_user_representation_contains_imei_and_name(self):
+        """User representation contains IMEI, name"""
         user0 = models.User.objects.create(residence=self.residence, imei='123', name='Le Me')
 
         response_user0 = self.client.get('/residence/3/user/123/')
@@ -133,11 +143,13 @@ class ViewUserTestCase(APITestCase):
         self.assertEqual(response_user0.data.get('name'), 'Le Me')
 
     def test_get_non_existent_user_imei_results_in_404(self):
+        """Request to non existent user IMEI results in HTTP 404"""
         response = self.client.get('/residence/3/user/123/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_user_of_unrelated_residence_404(self):
+        """Request to existent IMEI but unrelated residence results in HTTP 404"""
         unrelated_residence = models.Residence.objects.create(rfid='unrelated')
         user = models.User.objects.create(residence=self.residence, imei='123', name='Le Me')
 
@@ -146,6 +158,7 @@ class ViewUserTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_user(self):
+        """Can create user"""
         user_data = {'imei': '123', 'name': 'Le Me'}
         response = self.client.post('/residence/3/user/', user_data)
 
@@ -167,17 +180,20 @@ class ViewRoomTestCase(APITestCase):
         self.residence = models.Residence.objects.create(rfid='3')
 
     def test_list_rooms_empty(self):
+        """Request to empty room collection returns empty list"""
         response = self.client.get('/residence/3/room/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
     def test_list_rooms_of_non_existent_residence(self):
+        """Request to room collection of non existent residence results in HTTP 404"""
         response = self.client.get('/residence/not-a-residence/room/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_single_room(self):
+        """Request to collection with one room returns list with this room"""
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
 
         response = self.client.get('/residence/3/room/')
@@ -188,6 +204,7 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.data[0].get('residence').get('url'), 'http://testserver/residence/3/')
 
     def test_get_room(self):
+        """Room representation contains id, url, name, residence"""
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
 
         response = self.client.get('/residence/3/room/%s/' % room.pk)
@@ -199,11 +216,13 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.data.get('residence').get('url'), 'http://testserver/residence/3/')
 
     def test_get_room_404(self):
+        """Request to non existent room id results in HTTP 404"""
         response = self.client.get('/residence/3/room/1/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_room_of_unrelated_residence_404(self):
+        """Request with existent room id but unrelated residence results in HTTP 404"""
         unrelated_residence = models.Residence.objects.create(rfid='unrelated')
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
 
@@ -212,6 +231,7 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_first_created_room_has_pk_1(self):
+        """The firstly created room has id 1"""
         response = self.client.post('/residence/3/room/', {'name': 'Dining Room'})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -220,6 +240,7 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(queryset[0].name, 'Dining Room')
 
     def test_update_room(self):
+        """Can update room"""
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
 
         response = self.client.put('/residence/3/room/%s/' % room.pk, {'name': 'Play Room'})
@@ -230,6 +251,7 @@ class ViewRoomTestCase(APITestCase):
         self.assertEqual(queryset[0].name, 'Play Room')
 
     def test_destroy_room(self):
+        """Can delete room"""
         room = models.Room.objects.create(residence=self.residence, name='Dining Room')
 
         # Delete resource
@@ -253,22 +275,26 @@ class ViewThermostatTestCase(APITestCase):
         self.room = models.Room.objects.create(residence=self.residence, pk=1)
 
     def test_list_thermostats_empty(self):
+        """Request to empty thermostat collection returns empty list"""
         response = self.client.get('/residence/3/room/1/thermostat/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
 
     def test_list_thermostats_of_non_existent_residence(self):
+        """Request to thermostat collection of non existent residence results in HTTP 404"""
         response = self.client.get('/residence/not-a-residence/room/1/thermostat/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_thermostats_of_non_existent_room(self):
+        """Request to non existing thermostat results in HTTP 404"""
         response = self.client.get('/residence/3/room/999/thermostat/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_single_thermostat(self):
+        """Request to collection with one thermostat returns list with this thermostat"""
         thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
 
         response = self.client.get('/residence/3/room/1/thermostat/')
@@ -279,6 +305,7 @@ class ViewThermostatTestCase(APITestCase):
         self.assertEqual(response.data[0].get('room').get('url'), 'http://testserver/residence/3/room/1/')
 
     def test_get_thermostat(self):
+        """Thermostat representation contains RFID, room, temperatures_url"""
         thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
 
         response = self.client.get('/residence/3/room/1/thermostat/7e/')
@@ -290,11 +317,13 @@ class ViewThermostatTestCase(APITestCase):
                                                                 'thermostat/7e/temperature/')
 
     def test_get_thermostat_404(self):
+        """Request to non existent thermostat results in HTTP 404"""
         response = self.client.get('/residence/3/room/1/thermostat/8/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_thermostat_of_unrelated_residence_404(self):
+        """Request to existent thermostat but unrelated residence results in HTTP 404"""
         unrelated_residence = models.Residence.objects.create(rfid='unrelated')
         thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
 
@@ -303,6 +332,7 @@ class ViewThermostatTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_thermostat_of_unrelated_room_404(self):
+        """Request to existent thermostat but unrelated room results in HTTP 404"""
         unrelated_room = models.Room.objects.create(residence=self.residence, name='Unrelated Room')
         thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
 
@@ -311,6 +341,7 @@ class ViewThermostatTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_thermostat(self):
+        """Can create thermostat"""
         data = {'rfid': '7e'}
         response = self.client.post('/residence/3/room/1/thermostat/', data)
 
@@ -322,6 +353,7 @@ class ViewThermostatTestCase(APITestCase):
         self.assertEqual(queryset[0].rfid, '7e')
 
     def test_update_thermostat(self):
+        """Can update thermostat"""
         thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
 
         data = {'rfid': '42'}
@@ -388,7 +420,7 @@ class ViewTemperatureTestCase(APITestCase):
 
     def test_temperature_collection_contains_temperature_representations(self):
         """
-        Temperature collection contains temperature representations ordered by datetime
+        Temperature collection consists of temperature representations ordered by datetime
         """
         date0 = datetime.datetime(2015, 5, 13, 7, 0, 0, 0, timezone.get_current_timezone())
         date1 = datetime.datetime(2015, 5, 13, 8, 0, 0, 0, timezone.get_current_timezone())
@@ -522,7 +554,7 @@ class ViewTemperatureTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class ViewHeatingTableTestCase(APITestCase):
+class ViewHeatingTableEntryTestCase(APITestCase):
 
     def setUp(self):
         self.residence = models.Residence.objects.create(rfid='3')
