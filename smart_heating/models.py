@@ -90,7 +90,7 @@ class Thermostat(Model):
 class Temperature(Model):
     # TODO test datetime validation
     datetime = models.DateTimeField(primary_key=True)
-    value = models.FloatField(validators=[validators.MinValueValidator(5), validators.MaxValueValidator(30)])
+    value = models.FloatField()
     thermostat = models.ForeignKey('Thermostat', related_name='temperatures')
 
     class Meta:
@@ -205,7 +205,7 @@ class HeatingTableEntry(TimetableEntry):
         unique_together = ('day', 'time', 'thermostat')
         ordering = ('day', 'time')
 
-    temperature = models.FloatField()
+    temperature = models.FloatField(validators=[validators.MinValueValidator(5), validators.MaxValueValidator(30)])
     thermostat = models.ForeignKey(Thermostat, related_name='heating_table_entries')
 
     def get_recursive_pks(self):
