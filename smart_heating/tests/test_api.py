@@ -342,7 +342,7 @@ class ViewThermostatTestCase(APITestCase):
 
     def test_create_thermostat(self):
         """Can create thermostat"""
-        data = {'rfid': '7e'}
+        data = {'rfid': '7e', 'name': 'test'}
         response = self.client.post('/residence/3/room/1/thermostat/', data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -356,7 +356,7 @@ class ViewThermostatTestCase(APITestCase):
         """Can update thermostat"""
         thermostat = models.Thermostat.objects.create(room=self.room, rfid='7e')
 
-        data = {'rfid': '42'}
+        data = {'rfid': '42', 'name': 'test'}
         response = self.client.put('/residence/3/room/1/thermostat/7e/', data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

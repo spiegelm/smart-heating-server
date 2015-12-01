@@ -76,6 +76,7 @@ class Room(Model):
 class Thermostat(Model):
     rfid = models.CharField(primary_key=True, max_length=100, validators=[rfid_validator])
     room = models.ForeignKey('Room', related_name='thermostats')
+    name = models.CharField(max_length=100, blank=False)
 
     class Meta:
         ordering = ('rfid',)

@@ -62,7 +62,7 @@ class ThermostatSerializer(HierarchicalSerializer):
 
     class Meta:
         model = Thermostat
-        fields = ('rfid', 'url', 'room', 'temperatures_url', 'meta_entries_url', 'heating_table_url')
+        fields = ('rfid', 'url', 'name', 'room', 'temperatures_url', 'meta_entries_url', 'heating_table_url')
 
 
 class SimpleThermostatSerializer(ThermostatSerializer):
