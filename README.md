@@ -41,6 +41,11 @@ pip install -r requirements.txt
 ./manage.py runserver 0.0.0.0:8000
 # Test that server is accessible via browser
 # Kill server: CTRL-C
+```
+
+## Server Management
+
+```
 # Start server in the background using nohup
 ./scripts/restart_server.sh
 # Kill background server
