@@ -1,8 +1,12 @@
 # smart-heating-server [![Build Status](https://magnum.travis-ci.com/spiegelm/smart-heating-server.svg?token=uqu5q9gC3ZDdywezju6y&branch=master)](https://magnum.travis-ci.com/spiegelm/smart-heating-server)
 
-This is the repository for the server part of the Distributed System Laboratory project Smart Heating.
+This is the repository for the server part of the Distributed System Laboratory project Smart Heating:
 
-The server is a RESTful service designed to store temperature values and user preferences as well as residence occupancy. This allows to predict the future residence occupancy and therefore estimate the required temperature levels at all times.
+- [spiegelm/smart-heating-server](https://github.com/spiegelm/smart-heating-server)
+- [Octoshape/smart-heating-app](https://github.com/Octoshape/smart-heating-app)
+- [spiegelm/smart-heating-report](https://github.com/spiegelm/smart-heating-report)
+
+The server is a RESTful service designed to store and share temperature values and user preferences
 
 ## API
 
