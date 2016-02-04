@@ -2,13 +2,13 @@
 
 This is the repository for the server part of the Distributed System Laboratory project Smart Heating:
 
-- [spiegelm/smart-heating-server](https://github.com/spiegelm/smart-heating-server)
+- [**spiegelm/smart-heating-server**](https://github.com/spiegelm/smart-heating-server)
 - [Octoshape/smart-heating-app](https://github.com/Octoshape/smart-heating-app)
 - [spiegelm/smart-heating-report](https://github.com/spiegelm/smart-heating-report)
 
 The server is a RESTful service designed to store and share temperature values and user preferences
 
-## API
+## API design
 
 There are two different API responses for successful GET requests: *resource collections* and *resource representations*.
 
