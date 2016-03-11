@@ -77,13 +77,21 @@ class HierarchicalModelViewSet(HierarchicalModelHelper,
 
 class ResidenceViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows residences to be viewed or edited.
+    API endpoint that represents residences.
+
+    Each residence corresponds to an installed local communication gateway, i.e. a Raspberry Pi.
+    See the <a href="/device/raspberry/">/device/raspberry/</a> endpoint for more information.
     """
     queryset = Residence.objects.all()
     serializer_class = ResidenceSerializer
 
 
 class UserViewSet(HierarchicalModelViewSet):
+    """
+    API endpoint that represents users.
+
+    Each user is identified by her IMEI and is associated to exactly one residence.
+    """
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -93,6 +101,11 @@ class UserViewSet(HierarchicalModelViewSet):
 
 
 class RoomViewSet(HierarchicalModelViewSet):
+    """
+    API endpoint that represents rooms.
+
+    A room is part of a residence and is used to group thermostats.
+    """
 
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
@@ -102,6 +115,12 @@ class RoomViewSet(HierarchicalModelViewSet):
 
 
 class ThermostatViewSet(HierarchicalModelViewSet):
+    """
+    API endpoint that represents thermostats.
+
+    Contains the temperature values, the heating table and other meta data.
+    See the <a href="/device/thermostat/">/device/thermostat/</a> endpoint for more information.
+    """
 
     queryset = Thermostat.objects.all()
     serializer_class = ThermostatSerializer
@@ -111,6 +130,12 @@ class ThermostatViewSet(HierarchicalModelViewSet):
 
 
 class TemperatureViewSet(HierarchicalModelViewSet):
+    """
+    API endpoint that represents a thermostat's temperatures.
+
+    Offers pagination and custom views for the latest temperature measurement
+    and a chart to review current and historic values.
+    """
 
     queryset = Temperature.objects.all()
     serializer_class = TemperatureSerializer
@@ -158,6 +183,13 @@ class TemperatureViewSet(HierarchicalModelViewSet):
         return self._paginator
 
 class ThermostatMetaEntryViewSet(HierarchicalModelViewSet):
+    """
+    API endpoint that represents a time depending meta information about thermostats.
+
+    A meta entry consists of the received signal strength, up-time, battery level
+    and an associated timestamp. This data can be used to identify issues regarding the
+    thermostat devices such as wireless connection problems or drained batteries.
+    """
 
     queryset = ThermostatMetaEntry.objects.all()
     serializer_class = ThermostatMetaEntrySerializer
@@ -189,6 +221,13 @@ class ThermostatMetaEntryViewSet(HierarchicalModelViewSet):
 
 
 class HeatingTableEntryViewSet(HierarchicalModelViewSet):
+    """
+    API endpoint that represents the thermostat's associated temperature schedule.
+
+    The heating table is responsible for mapping each day and time in a week to a target temperature.
+    It's a periodic schedule repeating each week.
+    The first day of a week is 0 (Monday) and the last day of a week is 6 (Sunday).
+    """
 
     queryset = HeatingTableEntry.objects.all()
     serializer_class = HeatingTableEntrySerializer
@@ -216,6 +255,14 @@ class DeviceLookupMixin(viewsets.ModelViewSet):
 
 class RaspberryDeviceViewSet(DeviceLookupMixin,
                              viewsets.ModelViewSet):
+    """
+    API endpoint that links the MAC address of local communication gateways (Raspberry Pi) with their RFID tag.
+
+    Each Raspberry Pi corresponds to a residence.
+    This endpoint allows a Raspberry Pi to retrieve its associated RFID tag based on its Ethernet MAC address.
+    As soon as the user registers her Raspberry Pi it can query its associated thermostats.
+    This data must be provided before deployment.
+    """
 
     queryset = RaspberryDevice.objects.all()
     serializer_class = RaspberryDeviceSerializer
@@ -223,6 +270,11 @@ class RaspberryDeviceViewSet(DeviceLookupMixin,
 
 class ThermostatDeviceViewSet(DeviceLookupMixin,
                               viewsets.ModelViewSet):
+    """
+    API endpoint that links the MAC address of wireless thermostats with their RFID tag.
+
+    This data must be provided before deployment.
+    """
 
     queryset = ThermostatDevice.objects.all()
     serializer_class = ThermostatDeviceSerializer
