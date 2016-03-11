@@ -1,12 +1,13 @@
-from rest_framework import status, reverse
-from rest_framework.test import APITestCase
-from smart_heating import models
-
-from django.utils import timezone
 import datetime
 
-class ViewThermostatMetaEntryTestCase(APITestCase):
+from rest_framework import status, reverse
+from rest_framework.test import APITestCase
+from django.utils import timezone
 
+from smart_heating import models
+
+
+class ViewThermostatMetaEntryTestCase(APITestCase):
     residence = None
     room = None
     thermostat = None
@@ -17,7 +18,6 @@ class ViewThermostatMetaEntryTestCase(APITestCase):
         self.thermostat = models.Thermostat.objects.create(room=self.room, rfid='5')
 
     def test_meta_entries_collection_has_pagination(self):
-
         result = self.client.get('/residence/3/room/1/thermostat/5/meta_entry/')
 
         self.assertEqual(result.status_code, status.HTTP_200_OK)

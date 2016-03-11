@@ -1,6 +1,8 @@
+from abc import ABCMeta, abstractmethod
+
 from django.core import validators
 from django.db import models
-from abc import ABCMeta, abstractmethod
+
 
 # Create your models here.
 
@@ -8,11 +10,9 @@ from abc import ABCMeta, abstractmethod
 alpha_numeric_validator = validators.RegexValidator(r'^[0-9a-zA-Z]+$', 'Only alphanumeric characters are allowed.')
 rfid_validator = alpha_numeric_validator
 
+
 class Model(models.Model):
     __metaclass__ = ABCMeta
-
-    # TODO refactor the models to reuse more code
-    # parent = None
 
     class Meta:
         abstract = True
@@ -72,7 +72,6 @@ class Room(Model):
         return pks
 
 
-
 class Thermostat(Model):
     rfid = models.CharField(primary_key=True, max_length=100, validators=[rfid_validator])
     room = models.ForeignKey('Room', related_name='thermostats')
@@ -87,9 +86,7 @@ class Thermostat(Model):
         return pks
 
 
-# TODO use separate primary key and unique_together, as in HeatingTableEntry
 class Temperature(Model):
-    # TODO test datetime validation
     datetime = models.DateTimeField(primary_key=True)
     value = models.FloatField()
     thermostat = models.ForeignKey('Thermostat', related_name='temperatures')
@@ -99,13 +96,12 @@ class Temperature(Model):
 
     def get_recursive_pks(self):
         pks = self.thermostat.get_recursive_pks()
-        assert(self.pk == self.datetime)
+        assert (self.pk == self.datetime)
         pks.append(self.datetime.isoformat())
         return pks
 
 
 class ThermostatMetaEntry(Model):
-
     id = models.AutoField(primary_key=True)
     datetime = models.DateTimeField()
     rssi = models.IntegerField(null=True)
@@ -137,11 +133,10 @@ class Device(Model):
 
 
 class RaspberryDevice(Device):
-
     @property
     def residence(self):
         residences = Residence.objects.filter(rfid=self.rfid)
-        assert(0 <= len(residences) <= 1)
+        assert (0 <= len(residences) <= 1)
         if len(residences) > 0:
             return residences[0]
         else:
@@ -161,11 +156,10 @@ class RaspberryDevice(Device):
 
 
 class ThermostatDevice(Device):
-
     @property
     def thermostat(self):
         thermostats = Thermostat.objects.filter(rfid=self.rfid)
-        assert(0 <= len(thermostats) <= 1)
+        assert (0 <= len(thermostats) <= 1)
         if len(thermostats) > 0:
             return thermostats[0]
         else:
@@ -201,7 +195,6 @@ class TimetableEntry(Model):
 
 
 class HeatingTableEntry(TimetableEntry):
-
     class Meta:
         unique_together = ('day', 'time', 'thermostat')
         ordering = ('day', 'time')
@@ -216,7 +209,6 @@ class HeatingTableEntry(TimetableEntry):
 
 
 class OccupancyPredictionEntry(TimetableEntry):
-
     class Meta:
         unique_together = ('day', 'time', 'user')
         ordering = ('day', 'time')

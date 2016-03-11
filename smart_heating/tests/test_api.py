@@ -1,13 +1,13 @@
+import datetime
+
 from rest_framework import status
 from rest_framework.test import APITestCase
-from smart_heating import models
-
 from django.utils import timezone
-import datetime
+
+from smart_heating import models
 
 
 class ViewRootTestCase(APITestCase):
-
     def test_root_contains_residence_url(self):
         """Root contains residence url"""
         response = self.client.get('/')
@@ -17,7 +17,6 @@ class ViewRootTestCase(APITestCase):
 
 
 class ViewResidenceTestCase(APITestCase):
-
     def test_list_residences_empty(self):
         """Request to empty residence collection returns empty list"""
         response = self.client.get('/residence/')
@@ -99,7 +98,6 @@ class ViewResidenceTestCase(APITestCase):
 
 
 class ViewUserTestCase(APITestCase):
-
     residence = None
 
     def setUp(self):
@@ -168,12 +166,8 @@ class ViewUserTestCase(APITestCase):
         self.assertEqual(user.imei, '123')
         self.assertEqual(user.name, 'Le Me')
 
-    # TODO test_update_user
-    # TODO test_destroy_user
-
 
 class ViewRoomTestCase(APITestCase):
-
     residence = None
 
     def setUp(self):
@@ -266,7 +260,6 @@ class ViewRoomTestCase(APITestCase):
 
 
 class ViewThermostatTestCase(APITestCase):
-
     residence = None
     room = None
 
@@ -364,11 +357,8 @@ class ViewThermostatTestCase(APITestCase):
         self.assertEqual(len(queryset), 1)
         self.assertEqual(queryset[0].rfid, '42')
 
-    # TODO test_destroy_thermostat
-
 
 class ViewTemperatureTestCase(APITestCase):
-
     residence = None
     room = None
     thermostat = None
@@ -385,8 +375,10 @@ class ViewTemperatureTestCase(APITestCase):
         self.assertEqual(result.data.get('count'), 0)
         self.assertEqual(result.data.get('next_url'), None)
         self.assertEqual(result.data.get('previous_url'), None)
-        self.assertEqual(result.data.get('latest_temperature_url'), 'http://testserver/residence/3/room/1/thermostat/5/temperature/latest/')
-        self.assertEqual(result.data.get('chart_url'), 'http://testserver/residence/3/room/1/thermostat/5/temperature/chart/')
+        self.assertEqual(result.data.get('latest_temperature_url'),
+                         'http://testserver/residence/3/room/1/thermostat/5/temperature/latest/')
+        self.assertEqual(result.data.get('chart_url'),
+                         'http://testserver/residence/3/room/1/thermostat/5/temperature/chart/')
         self.assertEqual(result.data.get('results'), [])
 
     def test_list_temperatures_of_non_existent_residence(self):
@@ -407,9 +399,11 @@ class ViewTemperatureTestCase(APITestCase):
     def test_list_temperatures_of_unrelated_residence_404(self):
         unrelated_residence = models.Residence.objects.create(rfid='UNRELATED')
 
-        self.assertEqual(self.client.get('/residence/3/room/1/thermostat/5/temperature/').status_code, status.HTTP_200_OK)
+        self.assertEqual(self.client.get('/residence/3/room/1/thermostat/5/temperature/').status_code,
+                         status.HTTP_200_OK)
         self.assertEqual(self.client.get('/residence/UNRELATED/room/').status_code, status.HTTP_200_OK)
-        self.assertEqual(self.client.get('/residence/UNRELATED/room/1/thermostat/5/temperature/').status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(self.client.get('/residence/UNRELATED/room/1/thermostat/5/temperature/').status_code,
+                         status.HTTP_404_NOT_FOUND)
 
     def test_list_temperatures_of_unrelated_room_404(self):
         unrelated_room = models.Room.objects.create(residence=self.residence, name='Unrelated Room')
@@ -529,17 +523,16 @@ class ViewTemperatureTestCase(APITestCase):
 
 
 class ViewHeatingTableEntryTestCase(APITestCase):
-
     def setUp(self):
         self.residence = models.Residence.objects.create(rfid='3')
         self.room = models.Room.objects.create(residence=self.residence, name='fancy room name')
         self.thermostat = models.Thermostat.objects.create(room=self.room, rfid='5')
 
     def test_heating_table_entry_representation(self):
-
         time = datetime.datetime(2000, 1, 1, 13, 45, 0).time()
         entry = models.HeatingTableEntry.objects.create(thermostat=self.thermostat,
-                                                        day=models.HeatingTableEntry.MONDAY, time=time, temperature=23.0)
+                                                        day=models.HeatingTableEntry.MONDAY, time=time,
+                                                        temperature=23.0)
 
         response = self.client.get('/residence/3/room/1/thermostat/5/heating_table/%s/' % entry.pk)
 
@@ -550,14 +543,12 @@ class ViewHeatingTableEntryTestCase(APITestCase):
                          'http://testserver/residence/3/room/1/thermostat/5/')
 
     def test_create_heating_table_entry(self):
-
         data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 25.67}
         response = self.client.post('/residence/3/room/1/thermostat/5/heating_table/', data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_heating_table_entry_duplicate(self):
-
         data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 25.67}
         response = self.client.post('/residence/3/room/1/thermostat/5/heating_table/', data)
 
@@ -567,10 +558,10 @@ class ViewHeatingTableEntryTestCase(APITestCase):
         response = self.client.post('/residence/3/room/1/thermostat/5/heating_table/', data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data.get('non_field_errors'), ['The fields day, time, thermostat must make a unique set.'])
+        self.assertEqual(response.data.get('non_field_errors'),
+                         ['The fields day, time, thermostat must make a unique set.'])
 
     def test_create_heating_table_entry_duplicate_date_time_in_separate_thermostat(self):
-
         second_thermostat = models.Thermostat.objects.create(room=self.room, rfid='5b')
 
         data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 25.67}
@@ -601,17 +592,16 @@ class ViewHeatingTableEntryTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_heating_table_entry_deny_temperature_above_30(self):
-
         data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 30.05}
         response = self.client.post('/residence/3/room/1/thermostat/5/heating_table/', data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_heating_table_entry(self):
-
         time = datetime.datetime(2000, 1, 1, 13, 45, 0).time()
         entry = models.HeatingTableEntry.objects.create(thermostat=self.thermostat,
-                                                        day=models.HeatingTableEntry.MONDAY, time=time, temperature=23.0)
+                                                        day=models.HeatingTableEntry.MONDAY, time=time,
+                                                        temperature=23.0)
 
         data = {'day': models.HeatingTableEntry.MONDAY, 'time': '13:45:00', 'temperature': 25.67}
         response = self.client.put('/residence/3/room/1/thermostat/5/heating_table/%s/' % entry.pk, data)
@@ -628,7 +618,7 @@ class ViewHeatingTableEntryTestCase(APITestCase):
         entry_mon_12 = models.HeatingTableEntry.objects.create(
             thermostat=self.thermostat, day=models.HeatingTableEntry.MONDAY, time=time12, temperature=23.0)
         entry_fri_13 = models.HeatingTableEntry.objects.create(
-            thermostat=self.thermostat, day=models.HeatingTableEntry.FRIDAY, time=time13,temperature=23.0)
+            thermostat=self.thermostat, day=models.HeatingTableEntry.FRIDAY, time=time13, temperature=23.0)
         entry_mon_13 = models.HeatingTableEntry.objects.create(
             thermostat=self.thermostat, day=models.HeatingTableEntry.MONDAY, time=time13, temperature=23.0)
 
@@ -641,13 +631,3 @@ class ViewHeatingTableEntryTestCase(APITestCase):
         self.assertEqual(response.data[2].get('id'), entry_tue_12.id)
         self.assertEqual(response.data[3].get('id'), entry_tue_13.id)
         self.assertEqual(response.data[4].get('id'), entry_fri_13.id)
-
-
-class ViewRaspberryDeviceTestCase(APITestCase):
-    # TODO test raspberry device
-    pass
-
-
-class ViewThermostatDeviceTestCase(APITestCase):
-    # TODO test thermostat device
-    pass

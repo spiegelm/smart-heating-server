@@ -1,11 +1,11 @@
 from collections import OrderedDict
+
 from rest_framework import pagination
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 
 class BasePagination(pagination.LimitOffsetPagination):
-
     default_limit = 100
 
     def __init__(self, kwargs):
@@ -27,10 +27,16 @@ class BasePagination(pagination.LimitOffsetPagination):
         return Response(response_data)
 
     def get_custom_pagination_response_data(self, data):
-        """Override this method in a custom pagination sub class"""
+        """
+        Override this method in a custom pagination sub class
+        """
         return OrderedDict()
 
+
 class TemperaturePagination(BasePagination):
+    """
+    Custom pagination that includes urls to the chart and the latest temperature entry.
+    """
 
     def __init__(self, kwargs):
         self.latest_temperature_url = None
@@ -48,7 +54,11 @@ class TemperaturePagination(BasePagination):
             ('chart_url', self.chart_url)
         ])
 
+
 class ThermostatMetaEntriesPagination(BasePagination):
+    """
+    Custom pagination that includes the url to the latest temperature entry.
+    """
 
     def __init__(self, kwargs):
         self.latest_entry_url = None

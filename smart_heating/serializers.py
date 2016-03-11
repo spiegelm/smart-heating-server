@@ -1,9 +1,8 @@
 from rest_framework import serializers
-from rest_framework.fields import empty
 from rest_framework.validators import UniqueTogetherValidator
+
 from smart_heating import relations
 from smart_heating.models import *
-
 
 
 class HierarchicalSerializer(serializers.HyperlinkedModelSerializer):
@@ -28,7 +27,6 @@ class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserSerializer(HierarchicalSerializer):
-
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='user-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
 
@@ -54,8 +52,8 @@ class ThermostatSerializer(HierarchicalSerializer):
     temperatures_url = relations.HierarchicalHyperlinkedIdentityField(source='temperatures',
                                                                       view_name='temperature-list', read_only=True)
     meta_entries_url = relations.HierarchicalHyperlinkedIdentityField(source='meta_entries',
-                                                                    view_name='thermostatmetaentry-list',
-                                                                    read_only=True)
+                                                                      view_name='thermostatmetaentry-list',
+                                                                      read_only=True)
     heating_table_url = relations.HierarchicalHyperlinkedIdentityField(source='heating_table_entries',
                                                                        view_name='heatingtableentry-list',
                                                                        read_only=True)
@@ -69,6 +67,7 @@ class SimpleThermostatSerializer(ThermostatSerializer):
     """
     For a simplified representation. Includes only the url field.
     """
+
     class Meta:
         model = Thermostat
         fields = ('url',)
@@ -83,8 +82,6 @@ class HeatingTableEntrySerializer(HierarchicalSerializer):
         fields = ('id', 'url', 'day', 'time', 'temperature', 'thermostat')
         validators = [UniqueTogetherValidator(queryset=model.objects.all(),
                                               fields=('day', 'time', 'thermostat'))]
-        # validators = [UniqueTogetherValidator(queryset=model.objects.all(),
-        #                                       fields=model._meta.unique_together)]
 
 
 class TemperatureSerializer(HierarchicalSerializer):
@@ -109,7 +106,6 @@ class ThermostatMetaEntrySerializer(HierarchicalSerializer):
 class ThermostatDeviceSerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostatdevice-detail', read_only=True)
     thermostat = ThermostatSerializer(read_only=True)
-    # TODO validate MAC field
 
     class Meta:
         model = ThermostatDevice
@@ -120,7 +116,6 @@ class RaspberryDeviceSerializer(serializers.HyperlinkedModelSerializer):
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='raspberrydevice-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
     thermostat_devices = ThermostatDeviceSerializer(read_only=True, many=True)
-    # TODO validate MAC field
 
     class Meta:
         model = RaspberryDevice

@@ -1,6 +1,6 @@
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404, render
-from rest_framework import viewsets, renderers, mixins, status
+from rest_framework import viewsets, renderers, mixins
 from rest_framework.decorators import list_route
 
 from smart_heating.pagination import *
@@ -8,7 +8,6 @@ from smart_heating.serializers import *
 
 
 class HierarchicalModelHelper:
-
     def get_residence(self):
         return get_object_or_404(Residence.objects.all(), pk=self.kwargs['residence_pk'])
 
@@ -42,7 +41,6 @@ class HierarchicalModelHelper:
 
     def get_serializer_extra_data(self):
         return self.get_parent()
-
 
 
 class ProtectedModelViewSet(mixins.CreateModelMixin,
@@ -162,7 +160,7 @@ class TemperatureViewSet(HierarchicalModelViewSet):
         temperatures = self.get_queryset()
         print(temperatures)
         context = {
-            'temperatures': [[int(t.datetime.timestamp()*1000), t.value] for t in temperatures],
+            'temperatures': [[int(t.datetime.timestamp() * 1000), t.value] for t in temperatures],
             'room': self.get_room(),
             'thermostat': self.get_thermostat()
         }
@@ -181,6 +179,7 @@ class TemperatureViewSet(HierarchicalModelViewSet):
             else:
                 self._paginator = TemperaturePagination(kwargs=self.kwargs)
         return self._paginator
+
 
 class ThermostatMetaEntryViewSet(HierarchicalModelViewSet):
     """
@@ -237,12 +236,11 @@ class HeatingTableEntryViewSet(HierarchicalModelViewSet):
 
     def check_hierarchy(self):
         # Check residence, room and thermostat in hierarchy
-        self.get_room()         # This includes the residence check
+        self.get_room()  # This includes the residence check
         self.get_thermostat()
 
 
 class DeviceLookupMixin(viewsets.ModelViewSet):
-
     @list_route(methods=['get'], url_path='lookup')
     def lookup(self, request, *args, **kwargs):
         mac = request.GET.get('mac')

@@ -1,5 +1,6 @@
 from django.conf.urls import url, include
 from rest_framework import routers
+
 from smart_heating import views
 
 router = routers.DefaultRouter()
@@ -20,4 +21,3 @@ router.register(r'device/thermostat', views.ThermostatDeviceViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
 ]
-
