@@ -18,6 +18,9 @@ class HierarchicalSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Converts a residence object to its string representation and vice versa.
+    """
     rooms_url = serializers.HyperlinkedIdentityField(view_name='room-list', lookup_url_kwarg='residence_pk')
     users_url = serializers.HyperlinkedIdentityField(view_name='user-list', lookup_url_kwarg='residence_pk')
 
@@ -27,6 +30,9 @@ class ResidenceSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserSerializer(HierarchicalSerializer):
+    """
+    Converts a user object to its string representation and vice versa.
+    """
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='user-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
 
@@ -36,6 +42,9 @@ class UserSerializer(HierarchicalSerializer):
 
 
 class RoomSerializer(HierarchicalSerializer):
+    """
+    Converts a room object to its string representation and vice versa.
+    """
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='room-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
     thermostats_url = relations.HierarchicalHyperlinkedIdentityField(source='thermostats', view_name='thermostat-list',
@@ -47,6 +56,9 @@ class RoomSerializer(HierarchicalSerializer):
 
 
 class ThermostatSerializer(HierarchicalSerializer):
+    """
+    Converts a thermostat object to its string representation and vice versa.
+    """
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostat-detail', read_only=True)
     room = RoomSerializer(read_only=True)
     temperatures_url = relations.HierarchicalHyperlinkedIdentityField(source='temperatures',
@@ -65,7 +77,9 @@ class ThermostatSerializer(HierarchicalSerializer):
 
 class SimpleThermostatSerializer(ThermostatSerializer):
     """
-    For a simplified representation. Includes only the url field.
+    Converts a thermostat object to a simplified and most lightweight representation and vice versa.
+
+    Includes only the url field.
     """
 
     class Meta:
@@ -74,6 +88,9 @@ class SimpleThermostatSerializer(ThermostatSerializer):
 
 
 class HeatingTableEntrySerializer(HierarchicalSerializer):
+    """
+    Converts a heating table entry object to its string representation and vice versa.
+    """
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='heatingtableentry-detail', read_only=True)
     thermostat = SimpleThermostatSerializer(read_only=True)
 
@@ -85,6 +102,9 @@ class HeatingTableEntrySerializer(HierarchicalSerializer):
 
 
 class TemperatureSerializer(HierarchicalSerializer):
+    """
+    Converts a temperature entry object to its string representation and vice versa.
+    """
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='temperature-detail', read_only=True)
     # Use the simplified serializer for a smaller payload size
     thermostat = SimpleThermostatSerializer(read_only=True)
@@ -95,6 +115,9 @@ class TemperatureSerializer(HierarchicalSerializer):
 
 
 class ThermostatMetaEntrySerializer(HierarchicalSerializer):
+    """
+    Converts a thermostat meta entry object to its string representation and vice versa.
+    """
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostatmetaentry-detail', read_only=True)
 
     class Meta:
@@ -104,6 +127,9 @@ class ThermostatMetaEntrySerializer(HierarchicalSerializer):
 
 
 class ThermostatDeviceSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Converts a thermostat device object to its string representation and vice versa.
+    """
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='thermostatdevice-detail', read_only=True)
     thermostat = ThermostatSerializer(read_only=True)
 
@@ -113,6 +139,9 @@ class ThermostatDeviceSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class RaspberryDeviceSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Converts a Raspberry Pi device object to its string representation and vice versa.
+    """
     url = relations.HierarchicalHyperlinkedIdentityField(view_name='raspberrydevice-detail', read_only=True)
     residence = ResidenceSerializer(read_only=True)
     thermostat_devices = ThermostatDeviceSerializer(read_only=True, many=True)

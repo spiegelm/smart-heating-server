@@ -6,6 +6,9 @@ from rest_framework.reverse import reverse
 
 
 class BasePagination(pagination.LimitOffsetPagination):
+    """
+    Base class for pagination with customizable, additional fields.
+    """
     default_limit = 100
 
     def __init__(self, kwargs):

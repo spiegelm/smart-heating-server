@@ -4,14 +4,14 @@ from django.core import validators
 from django.db import models
 
 
-# Create your models here.
-
-
 alpha_numeric_validator = validators.RegexValidator(r'^[0-9a-zA-Z]+$', 'Only alphanumeric characters are allowed.')
 rfid_validator = alpha_numeric_validator
 
 
 class Model(models.Model):
+    """
+    Base class for all models.
+    """
     __metaclass__ = ABCMeta
 
     class Meta:
@@ -34,6 +34,9 @@ class Model(models.Model):
 
 
 class Residence(Model):
+    """
+    Represents a residence.
+    """
     rfid = models.CharField(primary_key=True, max_length=100, validators=[rfid_validator])
 
     class Meta:
@@ -45,6 +48,9 @@ class Residence(Model):
 
 
 class User(Model):
+    """
+    Represents a user.
+    """
     imei = models.CharField(primary_key=True, max_length=100, validators=[alpha_numeric_validator])
     name = models.CharField(max_length=100)
     residence = models.ForeignKey('Residence', related_name='users')
@@ -59,6 +65,9 @@ class User(Model):
 
 
 class Room(Model):
+    """
+    Represents a room.
+    """
     # id is automatically generated if no other primary_key is defined
     name = models.CharField(max_length=100)
     residence = models.ForeignKey('Residence', related_name='rooms')
@@ -73,6 +82,9 @@ class Room(Model):
 
 
 class Thermostat(Model):
+    """
+    Represents a thermostat.
+    """
     rfid = models.CharField(primary_key=True, max_length=100, validators=[rfid_validator])
     room = models.ForeignKey('Room', related_name='thermostats')
     name = models.CharField(max_length=100, blank=False)
@@ -87,6 +99,9 @@ class Thermostat(Model):
 
 
 class Temperature(Model):
+    """
+    Represents a temperature.
+    """
     datetime = models.DateTimeField(primary_key=True)
     value = models.FloatField()
     thermostat = models.ForeignKey('Thermostat', related_name='temperatures')
@@ -102,6 +117,9 @@ class Temperature(Model):
 
 
 class ThermostatMetaEntry(Model):
+    """
+    Represents a thermistat meta entry containing signal strength, uptime and battery level.
+    """
     id = models.AutoField(primary_key=True)
     datetime = models.DateTimeField()
     rssi = models.IntegerField(null=True)
@@ -120,6 +138,9 @@ class ThermostatMetaEntry(Model):
 
 
 class Device(Model):
+    """
+    Base class for a physical device with an RFID number and MAC address.
+    """
     __metaclass__ = ABCMeta
 
     rfid = models.CharField(primary_key=True, max_length=100, validators=[rfid_validator])
@@ -133,6 +154,9 @@ class Device(Model):
 
 
 class RaspberryDevice(Device):
+    """
+    Represents a physical Raspberry Pi device.
+    """
     @property
     def residence(self):
         residences = Residence.objects.filter(rfid=self.rfid)
@@ -144,6 +168,9 @@ class RaspberryDevice(Device):
 
     @property
     def thermostat_devices(self):
+        """
+        :return: Thermostat devices associated to the Raspberry Pi.
+        """
         residence = self.residence
         if residence is None:
             return None
@@ -156,6 +183,9 @@ class RaspberryDevice(Device):
 
 
 class ThermostatDevice(Device):
+    """
+    Represents a physical thermostat device.
+    """
     @property
     def thermostat(self):
         thermostats = Thermostat.objects.filter(rfid=self.rfid)
@@ -167,6 +197,9 @@ class ThermostatDevice(Device):
 
 
 class TimetableEntry(Model):
+    """
+    Base class for a weekly timetable entry.
+    """
     __metaclass__ = ABCMeta
 
     MONDAY = 0
@@ -195,6 +228,9 @@ class TimetableEntry(Model):
 
 
 class HeatingTableEntry(TimetableEntry):
+    """
+    Represents an entry of a heating schedule.
+    """
     class Meta:
         unique_together = ('day', 'time', 'thermostat')
         ordering = ('day', 'time')
@@ -209,6 +245,10 @@ class HeatingTableEntry(TimetableEntry):
 
 
 class OccupancyPredictionEntry(TimetableEntry):
+    """
+    Represents an user occupancy prediction entry.
+    This is a stub and is intended to be used in future work.
+    """
     class Meta:
         unique_together = ('day', 'time', 'user')
         ordering = ('day', 'time')

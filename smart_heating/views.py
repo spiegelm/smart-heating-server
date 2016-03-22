@@ -8,6 +8,10 @@ from smart_heating.serializers import *
 
 
 class HierarchicalModelHelper:
+    """
+    Helper class for hierarchical models.
+    Provides access to the often used residence, room and thermostat objects.
+    """
     def get_residence(self):
         return get_object_or_404(Residence.objects.all(), pk=self.kwargs['residence_pk'])
 
@@ -241,6 +245,9 @@ class HeatingTableEntryViewSet(HierarchicalModelViewSet):
 
 
 class DeviceLookupMixin(viewsets.ModelViewSet):
+    """
+    Provides a list route to lookup a device by its MAC address.
+    """
     @list_route(methods=['get'], url_path='lookup')
     def lookup(self, request, *args, **kwargs):
         mac = request.GET.get('mac')
