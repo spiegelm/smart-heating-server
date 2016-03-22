@@ -18,7 +18,7 @@ There are two different API responses for successful GET requests: *resource col
 
 ## Setup instructions
 
-Setup a virtual or dedicated server based on Ubuntu Linux 14.04 LTS and enter the following the commands in a terminal:
+Setup a virtual or dedicated server based on Ubuntu Linux 14.04 LTS and enter the following commands in a terminal:
 
 ```bash
 # Install dependencies
